@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE menu [
+	<!ENTITY otherFile SYSTEM "main_settings.xml">
+	]>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+<!--
+	<item
+		android:id="@+id/settings"
+		android:title="@string/settings"
+		/>
+-->
+	<item
+		android:id="@+id/more_vert"
+		android:title="1"
+		android:icon="@drawable/more_vert"
+		android:orderInCategory="1"
+		app:showAsAction="always">
+		<!--<menu>
+			<item
+				app:showAsAction="ifRoom"
+				android:id="@+id/settings"
+				android:title="@string/settings"
+				/>
+		</menu>-->
+		&otherFile;
+	</item>
+	
+</menu>

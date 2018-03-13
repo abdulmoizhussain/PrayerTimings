@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+		android:title="Notifications"
+		android:summary="Notifies at the start of every Prayer time."
+		android:key="notification_switch"
+		android:defaultValue="false"
+		>
+	</CheckBoxPreference>
+
+	<CheckBoxPreference
+		android:title="Silence"
+		android:summary="Silents phone for Prayers."
+		android:key="silence_switch"
+		android:defaultValue="false"
+		>
+	</CheckBoxPreference>
+	
+	<ListPreference
+		android:title="Silence Duration"
+		android:key="silence_duration"
+		android:entries="@array/silenceDuration"
+		android:entryValues="@array/silenceDurationValues"
+		>
+	</ListPreference>
+
+	<PreferenceCategory
+		android:title="Silence Timings for Prayers"
+		android:key="silence_category">
+
+		<Preference android:title="Fajr"
+					android:key="fajr"/>
+
+		<Preference android:title="Zuhur"
+					android:key="zuhur"/>
+
+		<Preference android:title="Asr"
+					android:key="asr"/>
+
+		<Preference android:title="Maghrib"
+					android:key="maghrib"/>
+
+		<Preference android:title="Isha"
+					android:key="isha"/>
+	</PreferenceCategory>
+	
+</PreferenceScreen>
