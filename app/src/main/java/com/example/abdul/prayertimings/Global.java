@@ -22,23 +22,32 @@ import java.util.TimeZone;
 
 class Global {
     public static final String DB_NAME = "Karachi.sqlite";
-    public static final HashMap<Integer, String> fullNameOfIslamicMonths;
+    public static final HashMap<Integer, String> IslamicMonthFullName;
+    public static final HashMap<Integer, String> notificationMessage;
 
     static {
-        HashMap<Integer, String> namesOfIslamicMonths = new HashMap<>();
-        namesOfIslamicMonths.put(1, "Muharram");
-        namesOfIslamicMonths.put(2, "Safar");
-        namesOfIslamicMonths.put(3, "Rabiul-Awwal");
-        namesOfIslamicMonths.put(4, "Rabi-uthani");
-        namesOfIslamicMonths.put(5, "Jumadi-ul-Awwal");
-        namesOfIslamicMonths.put(6, "Jumadi-uthani");
-        namesOfIslamicMonths.put(7, "Rajab");
-        namesOfIslamicMonths.put(8, "Sha’ban");
-        namesOfIslamicMonths.put(9, "Ramadan");
-        namesOfIslamicMonths.put(10, "Shawwal");
-        namesOfIslamicMonths.put(11, "Zhul-Q’ada");
-        namesOfIslamicMonths.put(12, "Zhul-Hijja");
-        fullNameOfIslamicMonths = namesOfIslamicMonths;
+        IslamicMonthFullName = new HashMap<>();
+        IslamicMonthFullName.put(1, "Muharram");
+        IslamicMonthFullName.put(2, "Safar");
+        IslamicMonthFullName.put(3, "Rabiul-Awwal");
+        IslamicMonthFullName.put(4, "Rabi-uthani");
+        IslamicMonthFullName.put(5, "Jumadi-ul-Awwal");
+        IslamicMonthFullName.put(6, "Jumadi-uthani");
+        IslamicMonthFullName.put(7, "Rajab");
+        IslamicMonthFullName.put(8, "Sha’ban");
+        IslamicMonthFullName.put(9, "Ramadan");
+        IslamicMonthFullName.put(10, "Shawwal");
+        IslamicMonthFullName.put(11, "Zhul-Q’ada");
+        IslamicMonthFullName.put(12, "Zhul-Hijja");
+
+        notificationMessage = new HashMap<>();
+        notificationMessage.put(0, "Fajr time has started.");
+        notificationMessage.put(1, "Fajr time has ended.");
+        notificationMessage.put(2, "Zawal time.");
+        notificationMessage.put(3, "Zuhur time has started.");
+        notificationMessage.put(4, "Asr time has started.");
+        notificationMessage.put(5, "Maghrib time has started.");
+        notificationMessage.put(6, "Isha time has started.");
     }
 
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
@@ -83,7 +92,9 @@ class Global {
                 Calendar calender = Calendar.getInstance();
                 Date currentSystemTime = DateFormats.hour24.parse(DateFormats.hour24.format(calender.getTime()));
 
+                assert timeToSet != null;
                 if (timeToSet.after(currentSystemTime) /*|| timeToSet.equals(currentSystemTime)*/) {
+                    assert currentSystemTime != null;
                     long delay = timeToSet.getTime() - currentSystemTime.getTime();
                     makeNotifications(index, delay, context);
                 }
@@ -102,31 +113,11 @@ class Global {
         alertIntent.putExtra("index", index);
         alertIntent.putExtra("setWhen", alertTime);
 
-        alertIntent.putExtra("MSG", getPrayerTimeMessageByIndexForNotification(index));
+        alertIntent.putExtra("MSG", Global.notificationMessage.get(index));
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, alertIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        assert alarmManager != null;
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
-    }
-
-    private static String getPrayerTimeMessageByIndexForNotification(int index) {
-        switch (index) {
-            case 0:
-                return "Fajr time has started.";
-            case 1:
-                return "Fajr time has ended.";
-            case 2:
-                return "Zawal time.";
-            case 3:
-                return "Zuhur time has started.";
-            case 4:
-                return "Asr time has started.";
-            case 5:
-                return "Maghrib time has started.";
-            case 6:
-                return "Isha time has started.";
-            default:
-                return "---";
-        }
     }
 
     static void cancelNotifications(Context context) {
@@ -175,8 +166,10 @@ class Global {
                 Date currentTime = DateFormats.hour24.parse(DateFormats.hour24.format(Calendar.getInstance().getTime()));
                 Date silenceTime = DateFormats.hour24.parse(Global.formatThisTimeIn24(prefs.getLong(Integer.toString(i), 0)));
 
+                assert currentTime != null;
                 if (currentTime.before(silenceTime)) {
 
+                    assert silenceTime != null;
                     long silencerTime = Global.getCurrentTimeMillis() + silenceTime.getTime() - currentTime.getTime();
                     Intent intent1 = new Intent(context, MobileSilencer.class);
                     intent1.putExtra("switchCase", "toSilent");
@@ -184,6 +177,7 @@ class Global {
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, i, intent1,
                             PendingIntent.FLAG_CANCEL_CURRENT);
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    assert alarmManager != null;
                     alarmManager.set(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
                 }
             } catch (ParseException e) {

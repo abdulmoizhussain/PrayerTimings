@@ -25,7 +25,6 @@ import org.joda.time.chrono.IslamicChronology;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textViewDateADValue;
@@ -45,15 +44,11 @@ public class MainActivity extends AppCompatActivity {
 
         registerUIUpdater();
 
-//		testNotification();
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 /*
 		//FOR DEVICES WHICH HAVE HARDWARE OPTIONS/SETTINGS BUTTONS
 		try {
 			ViewConfiguration config = ViewConfiguration.get(this);
 			Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-
 			if (menuKeyField != null) {
 				menuKeyField.setAccessible(true);
 				menuKeyField.setBoolean(config, false);
@@ -62,17 +57,6 @@ public class MainActivity extends AppCompatActivity {
 		catch (Exception e) {
 			// presumably, not relevant
 		}
-*/
-
-/*
-		final Handler handler = new Handler();
-		final Runnable runnable = new Runnable() {
-			public void run() {
-				checkAndSetTimeWithDatabaseManager();
-				handler.postDelayed(this, 1000);
-			}
-		};
-		handler.postDelayed(runnable, 1000);
 */
     }
 
@@ -183,62 +167,6 @@ public class MainActivity extends AppCompatActivity {
         receiverIsRegistered = false;
     }
 
-
-
-/*
-	void setTime (DBHelper mDBHelper) {
-		String[] text_view = getResources().getStringArray(R.array.text_view_array);
-		TextView view[] = new TextView[7];
-		view[0] = (TextView) findViewById(R.id.textView);
-		view[1] = (TextView) findViewById(R.id.textView2);
-		view[2] = (TextView) findViewById(R.id.textView3);
-		view[3] = (TextView) findViewById(R.id.textView4);
-		view[4] = (TextView) findViewById(R.id.textView5);
-		view[5] = (TextView) findViewById(R.id.textView6);
-		view[6] = (TextView) findViewById(R.id.textView7);
-
-		try {
-			String time[] = mDBHelper.fetchTime(currentDate(), currentMonth());
-
-			Calendar calender = Calendar.getInstance();
-			try {
-				Date currentSystemTime = format24().parse(format24().format(calender.getTime()));
-				for (int i = 0; i < 7; i++) {
-					Date timeToSet = format24().parse(time[i]);
-
-					if (_is12HourFormat) {
-						view[i].setText(text_view[i] +" "+ time[i]);
-					} else {
-						view[i].setText(text_view[i] +" "+ format12().format(timeToSet));
-						//view[i].setText(format12().format(timeToSet));
-					}
-
-					view[i].setTextColor(_defaultColorStateList);
-					if (currentSystemTime.after(timeToSet) || currentSystemTime.equals(timeToSet)
-							|| currentSystemTime.before(format24().parse(time[0]))) {
-
-						view[i].setTextColor(_colorCodeGreen);
-						//view[i].getTextColors();
-						if ( (i-1) > -1) {
-							//view[i-1].setTextColor(_colorCodeGreen);
-							view[i-1].setTextColor(_defaultColorStateList);
-						} else {
-							//view[6].setTextColor(_colorCodeGreen);
-							view[6].setTextColor(_defaultColorStateList);
-						}
-					}
-				}
-				mDBHelper.close();
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Error Reading Database.",Toast.LENGTH_LONG).show();
-		}
-	}
-*/
-
     void renderPrayerTimings(String[] time) {
         TextView[] view = new TextView[7];
         view[0] = findViewById(R.id.textViewFajarTime);
@@ -292,54 +220,27 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.textView8);
         textView.setText(todayHijri.toString("dd"));
 
-        textView.append("-" + Global.fullNameOfIslamicMonths.get(todayHijri.getMonthOfYear()) + "-");
+        textView.append("-" + Global.IslamicMonthFullName.get(todayHijri.getMonthOfYear()) + "-");
 
         textView.append(todayHijri.toString("yyyy"));
     }
-
-	/*
-	private Notification getNotification(String content, long setWhenTime) {
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-		builder.setContentTitle("Scheduled Notification");
-		builder.setContentText(content);
-		builder.setSmallIcon(R.drawable.abc);
-		builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
-		//builder.setWhen(setWhenTime);
-		builder.setShowWhen(true);
-
-		return builder.build();
-	}
-*/
-    //START OF  TRY 2
-    //long alertTime = SystemClock.elapsedRealtime()+3*60*1000;
-/*
-		long alertTime = System.currentTimeMillis() + 3*60*1000;
-		Intent alertIntent = new Intent(this,
-				NotificationPublisher.class);
-		AlarmManager alarmManager = (AlarmManager)
-				getSystemService(Context.ALARM_SERVICE);
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, alertIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
-*/
-				/*
-//				Sample code to create Handler/Runnable/Thread
-		Handler handler = new Handler(this.getMainLooper());
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run () {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						checkNsetTime();
-					}
-				});
-			}
-		};
-		new Thread(runnable).start();
-		*/
+//	    Sample code to create Handler/Runnable/Thread
+//		Handler handler = new Handler(this.getMainLooper());
+//		Runnable runnable = new Runnable() {
+//			@Override
+//			public void run () {
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//				handler.post(new Runnable() {
+//					@Override
+//					public void run() {
+//						checkNsetTime();
+//					}
+//				});
+//			}
+//		};
+//		new Thread(runnable).start();
 }
