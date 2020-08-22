@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 /**
@@ -21,6 +22,25 @@ import java.util.TimeZone;
 
 class Global {
     public static final String DB_NAME = "Karachi.sqlite";
+    public static final HashMap<Integer, String> fullNameOfIslamicMonths;
+
+    static {
+        HashMap<Integer, String> namesOfIslamicMonths = new HashMap<>();
+        namesOfIslamicMonths.put(1, "Muharram");
+        namesOfIslamicMonths.put(2, "Safar");
+        namesOfIslamicMonths.put(3, "Rabiul-Awwal");
+        namesOfIslamicMonths.put(4, "Rabi-uthani");
+        namesOfIslamicMonths.put(5, "Jumadi-ul-Awwal");
+        namesOfIslamicMonths.put(6, "Jumadi-uthani");
+        namesOfIslamicMonths.put(7, "Rajab");
+        namesOfIslamicMonths.put(8, "Sha’ban");
+        namesOfIslamicMonths.put(9, "Ramadan");
+        namesOfIslamicMonths.put(10, "Shawwal");
+        namesOfIslamicMonths.put(11, "Zhul-Q’ada");
+        namesOfIslamicMonths.put(12, "Zhul-Hijja");
+        fullNameOfIslamicMonths = namesOfIslamicMonths;
+    }
+
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
 
     static boolean getSilenceFlag(Context context) {
@@ -83,7 +103,6 @@ class Global {
         alertIntent.putExtra("setWhen", alertTime);
 
         alertIntent.putExtra("MSG", getPrayerTimeMessageByIndexForNotification(index));
-//        alertIntent = getPrayerTimeMessageForNotification(index, alertIntent);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, alertIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);

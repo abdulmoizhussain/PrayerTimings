@@ -25,6 +25,7 @@ import org.joda.time.chrono.IslamicChronology;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textViewDateADValue;
@@ -251,21 +252,21 @@ public class MainActivity extends AppCompatActivity {
         final boolean is24HourFormat = DateFormat.is24HourFormat(this);
         try {
             Date currentSystemTime = DateFormats.hour24.parse(DateFormats.hour24.format(new Date()));
-            for (int i = 0; i < 7; i++) {
-                Date timeToSet = DateFormats.hour24.parse(time[i]);
+            for (int index = 0; index < 7; index++) {
+                Date timeToSet = DateFormats.hour24.parse(time[index]);
 
                 assert currentSystemTime != null;
                 assert timeToSet != null;
                 {
                     String timeString = is24HourFormat ? DateFormats.hour24.format(timeToSet) : DateFormats.hour12.format(timeToSet);
-                    view[i].setText(timeString);
+                    view[index].setText(timeString);
                 }
 
-                view[i].setTextColor(_defaultColorStateList);
+                view[index].setTextColor(_defaultColorStateList);
                 if (currentSystemTime.after(timeToSet) || currentSystemTime.equals(timeToSet) || currentSystemTime.before(DateFormats.hour24.parse(time[0]))) {
-                    view[i].setTextColor(_colorCodeGreen);
-                    if ((i - 1) > -1) {
-                        view[i - 1].setTextColor(_defaultColorStateList);
+                    view[index].setTextColor(_colorCodeGreen);
+                    if ((index - 1) > -1) {
+                        view[index - 1].setTextColor(_defaultColorStateList);
                     } else {
                         view[6].setTextColor(_defaultColorStateList);
                     }
@@ -290,39 +291,10 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = (TextView) findViewById(R.id.textView8);
         textView.setText(todayHijri.toString("dd"));
-        textView.append("-" + getNameOfIslamicMonth(todayHijri.getMonthOfYear()) + "-");
-        textView.append(todayHijri.toString("yyyy"));
-    }
 
-    private String getNameOfIslamicMonth(int monthNumber) {
-        switch (monthNumber) {
-            case 1:
-                return "Muharram";
-            case 2:
-                return "Safar";
-            case 3:
-                return "Rabiul-Awwal";
-            case 4:
-                return "Rabi-uthani";
-            case 5:
-                return "Jumadi-ul-Awwal";
-            case 6:
-                return "Jumadi-uthani";
-            case 7:
-                return "Rajab";
-            case 8:
-                return "Sha’ban";
-            case 9:
-                return "Ramadan";
-            case 10:
-                return "Shawwal";
-            case 11:
-                return "Zhul-Q’ada";
-            case 12:
-                return "Zhul-Hijja";
-            default:
-                return " ";
-        }
+        textView.append("-" + Global.fullNameOfIslamicMonths.get(todayHijri.getMonthOfYear()) + "-");
+
+        textView.append(todayHijri.toString("yyyy"));
     }
 
 	/*
