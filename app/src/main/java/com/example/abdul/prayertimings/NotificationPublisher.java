@@ -8,30 +8,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 
 public class NotificationPublisher extends BroadcastReceiver {
-	Global global;
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		global = new Global();
-
 		// START OF TRY 3
-		if (global.getNotificationFlag(context)) {
+		if (Global.getNotificationFlag(context)) {
 			int ID = intent.getIntExtra("ID", 0);
 			String contentText = intent.getStringExtra("MSG");
 			long setWhen = intent.getLongExtra("setWhen", 0);
 
 			try {
-				Calendar calender = Calendar.getInstance();// can be replaced with "Date date = new Date();"
-				Date currentSystemTime = Global.format24().parse(Global.format24().format(calender.getTime()));
-				Date timeToCheck = Global.format24().parse(Global.format24().format(setWhen));
-				Date timeToCheck1 = Global.format24().parse(Global.format24().format(setWhen + 3000));
+				Date currentSystemTime = DateFormats.hour24.parse(DateFormats.hour24.format(new Date()));
+				Date timeToCheck = DateFormats.hour24.parse(DateFormats.hour24.format(setWhen));
+				Date timeToCheck1 = DateFormats.hour24.parse(DateFormats.hour24.format(setWhen + 3000));
 				
 				if (currentSystemTime.equals(timeToCheck) || currentSystemTime.equals(timeToCheck1))
 					publishNotification(context, ID, contentText, setWhen);
