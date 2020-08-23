@@ -26,6 +26,8 @@ class Global {
     public static final String DB_NAME = "Karachi.sqlite";
     public static final Map<Integer, String> IslamicMonthFullName;
     public static final Map<Integer, String> NotificationMessage;
+    public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
+
 
     static {
         {
@@ -57,7 +59,6 @@ class Global {
         }
     }
 
-    public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
 
     static boolean getSilenceFlag(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("silence_switch", false);
