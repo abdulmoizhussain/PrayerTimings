@@ -11,8 +11,10 @@ import android.text.format.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -22,32 +24,37 @@ import java.util.TimeZone;
 
 class Global {
     public static final String DB_NAME = "Karachi.sqlite";
-    public static final HashMap<Integer, String> IslamicMonthFullName;
-    public static final HashMap<Integer, String> notificationMessage;
+    public static final Map<Integer, String> IslamicMonthFullName;
+    public static final Map<Integer, String> NotificationMessage;
 
     static {
-        IslamicMonthFullName = new HashMap<>();
-        IslamicMonthFullName.put(1, "Muharram");
-        IslamicMonthFullName.put(2, "Safar");
-        IslamicMonthFullName.put(3, "Rabiul-Awwal");
-        IslamicMonthFullName.put(4, "Rabi-uthani");
-        IslamicMonthFullName.put(5, "Jumadi-ul-Awwal");
-        IslamicMonthFullName.put(6, "Jumadi-uthani");
-        IslamicMonthFullName.put(7, "Rajab");
-        IslamicMonthFullName.put(8, "Sha’ban");
-        IslamicMonthFullName.put(9, "Ramadan");
-        IslamicMonthFullName.put(10, "Shawwal");
-        IslamicMonthFullName.put(11, "Zhul-Q’ada");
-        IslamicMonthFullName.put(12, "Zhul-Hijja");
-
-        notificationMessage = new HashMap<>();
-        notificationMessage.put(0, "Fajr time has started.");
-        notificationMessage.put(1, "Fajr time has ended.");
-        notificationMessage.put(2, "Zawal time.");
-        notificationMessage.put(3, "Zuhur time has started.");
-        notificationMessage.put(4, "Asr time has started.");
-        notificationMessage.put(5, "Maghrib time has started.");
-        notificationMessage.put(6, "Isha time has started.");
+        {
+            Map<Integer, String> map = new HashMap<>();
+            map.put(1, "Muharram");
+            map.put(2, "Safar");
+            map.put(3, "Rabiul-Awwal");
+            map.put(4, "Rabi-uthani");
+            map.put(5, "Jumadi-ul-Awwal");
+            map.put(6, "Jumadi-uthani");
+            map.put(7, "Rajab");
+            map.put(8, "Sha’ban");
+            map.put(9, "Ramadan");
+            map.put(10, "Shawwal");
+            map.put(11, "Zhul-Q’ada");
+            map.put(12, "Zhul-Hijja");
+            IslamicMonthFullName = Collections.unmodifiableMap(map);
+        }
+        {
+            Map<Integer, String> map = new HashMap<>();
+            map.put(0, "Fajr time has started.");
+            map.put(1, "Fajr time has ended.");
+            map.put(2, "Zawal time.");
+            map.put(3, "Zuhur time has started.");
+            map.put(4, "Asr time has started.");
+            map.put(5, "Maghrib time has started.");
+            map.put(6, "Isha time has started.");
+            NotificationMessage = Collections.unmodifiableMap(map);
+        }
     }
 
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
@@ -113,7 +120,7 @@ class Global {
         alertIntent.putExtra("index", index);
         alertIntent.putExtra("setWhen", alertTime);
 
-        alertIntent.putExtra("MSG", Global.notificationMessage.get(index));
+        alertIntent.putExtra("MSG", Global.NotificationMessage.get(index));
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, alertIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         assert alarmManager != null;

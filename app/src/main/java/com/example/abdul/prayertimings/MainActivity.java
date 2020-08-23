@@ -27,10 +27,10 @@ import java.text.ParseException;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView textViewDateADValue;
+    private TextView textViewDateADValue, textViewDateHijri;
     private BroadcastReceiver broadcastReceiver;
     private ColorStateList _defaultColorStateList;
-    private int _colorCodeGreen = Color.parseColor("#008000");
+    private static final int _colorCodeGreen = Color.parseColor("#008000");
     private boolean receiverIsRegistered;
 
     @Override
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.settings_screen, true);
 
+        textViewDateHijri = findViewById(R.id.textView8);
         textViewDateADValue = findViewById(R.id.textView15);
         _defaultColorStateList = textViewDateADValue.getTextColors();
 
@@ -206,23 +207,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void setHijriDate() {
-        Chronology iso = ISOChronology.getInstanceUTC();
-        Chronology hijri = IslamicChronology.getInstanceUTC();
-
-        LocalDate todayIso = new LocalDate(
+        Chronology isoChronology = ISOChronology.getInstanceUTC();
+        Chronology islamicChronology = IslamicChronology.getInstanceUTC();
+        LocalDate localDateIso = new LocalDate(
                 Integer.parseInt(Global.currentYear()),
                 Integer.parseInt(Global.currentMonth_MM()),
                 Integer.parseInt(Global.currentDate()),
-                iso
+                isoChronology
         );
-        LocalDate todayHijri = new LocalDate(todayIso.toDateTimeAtStartOfDay(), hijri);
+        LocalDate localDateIslamic = new LocalDate(localDateIso.toDateTimeAtStartOfDay(), islamicChronology);
+        String date = localDateIslamic.toString("dd");
+        String month = Global.IslamicMonthFullName.get(localDateIslamic.getMonthOfYear());
+        String year = localDateIslamic.toString("yyyy");
 
-        TextView textView = (TextView) findViewById(R.id.textView8);
-        textView.setText(todayHijri.toString("dd"));
-
-        textView.append("-" + Global.IslamicMonthFullName.get(todayHijri.getMonthOfYear()) + "-");
-
-        textView.append(todayHijri.toString("yyyy"));
+        textViewDateHijri.setText(String.format("%s-%s-%s", date, month, year));
     }
 //	    Sample code to create Handler/Runnable/Thread
 //		Handler handler = new Handler(this.getMainLooper());
