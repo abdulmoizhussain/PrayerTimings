@@ -58,15 +58,15 @@ public class DBHelper extends SQLiteOpenHelper {
                 this.getReadableDatabase();
                 try {
                     int length;
-                    byte[] buffer = new byte[1024];
-                    OutputStream myOutput = new FileOutputStream(this.databasePath + this.databaseName);
-                    InputStream myInput = this.context.getAssets().open(this.databaseName);
-                    while ((length = myInput.read(buffer)) > 0) {
-                        myOutput.write(buffer, 0, length);
+                    byte[] byteArrayBuffer = new byte[1024];
+                    OutputStream outputStream = new FileOutputStream(this.databasePath + this.databaseName);
+                    InputStream inputStream = this.context.getAssets().open(this.databaseName);
+                    while ((length = inputStream.read(byteArrayBuffer)) > 0) {
+                        outputStream.write(byteArrayBuffer, 0, length);
                     }
-                    myOutput.flush();
-                    myOutput.close();
-                    myInput.close();
+                    outputStream.flush();
+                    outputStream.close();
+                    inputStream.close();
                     return "copied";
                 } catch (IOException e) {
                     e.printStackTrace();

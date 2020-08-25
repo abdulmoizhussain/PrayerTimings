@@ -10,7 +10,6 @@ import android.text.format.DateFormat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,7 +26,6 @@ class Global {
     public static final Map<Integer, String> IslamicMonthFullName;
     public static final Map<Integer, String> NotificationMessage;
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
-
 
     static {
         {
@@ -93,12 +91,12 @@ class Global {
 
     public static void setNotifications(Context context) {
         DBHelper mDBHelper = new DBHelper(context, Global.DB_NAME);
-        String[] time = mDBHelper.fetchTime(Global.currentDate(), Global.currentMonth());
+        DateTime date = new DateTime();
+        String[] time = mDBHelper.fetchTime(date.formatDate(), date.formatMonth());
         for (int index = 0; index < 7; index++) {
             try {
                 Date timeToSet = DateFormats.hour24.parse(time[index]);
-                Calendar calender = Calendar.getInstance();
-                Date currentSystemTime = DateFormats.hour24.parse(DateFormats.hour24.format(calender.getTime()));
+                Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
 
                 assert timeToSet != null;
                 if (timeToSet.after(currentSystemTime) /*|| timeToSet.equals(currentSystemTime)*/) {
@@ -143,21 +141,6 @@ class Global {
         }
     }
 
-    public static String currentDate() {
-        return DateFormats.dd.format(new Date());
-    }
-
-    public static String currentMonth() {
-        return DateFormats.MMMM.format(new Date());
-    }
-
-    public static String currentMonth_MM() {
-        return DateFormats.MM.format(new Date());
-    }
-
-    public static String currentYear() {
-        return DateFormats.yyyy.format(new Date());
-    }
 
     public static String formatThisTimeIn24(Long time) {
         SimpleDateFormat simpleDateFormat = (SimpleDateFormat) DateFormats.hour24.clone();
@@ -171,12 +154,11 @@ class Global {
             try {
                 if (prefs.getLong(Integer.toString(i), 0) == 0)
                     continue;
-                Date currentTime = DateFormats.hour24.parse(DateFormats.hour24.format(Calendar.getInstance().getTime()));
+                Date currentTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
                 Date silenceTime = DateFormats.hour24.parse(Global.formatThisTimeIn24(prefs.getLong(Integer.toString(i), 0)));
 
                 assert currentTime != null;
                 if (currentTime.before(silenceTime)) {
-
                     assert silenceTime != null;
                     long silencerTime = Global.getCurrentTimeMillis() + silenceTime.getTime() - currentTime.getTime();
                     Intent intent1 = new Intent(context, MobileSilencer.class);
@@ -194,3 +176,5 @@ class Global {
         }
     }
 }
+
+

@@ -27,7 +27,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView textViewDateADValue, textViewDateHijri;
+    private TextView textViewDateAD, textViewDateAH;
     private BroadcastReceiver broadcastReceiver;
     private ColorStateList _defaultColorStateList;
     private static final int _colorCodeGreen = Color.parseColor("#008000");
@@ -37,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         PreferenceManager.setDefaultValues(this, R.xml.settings_screen, true);
 
-        textViewDateHijri = findViewById(R.id.textView8);
-        textViewDateADValue = findViewById(R.id.textView15);
-        _defaultColorStateList = textViewDateADValue.getTextColors();
+        textViewDateAD = findViewById(R.id.textView15);
+        textViewDateAH = findViewById(R.id.textView8);
+        _defaultColorStateList = textViewDateAD.getTextColors();
 
         registerUIUpdater();
 
@@ -70,9 +71,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setHijriDate();
-        textViewDateADValue.setText(String.format("%s-%s-%s", Global.currentDate(), Global.currentMonth(), Global.currentYear()));
-        checkAndSetTimeWithDatabaseManager();
+        {
+            DateTime date = new DateTime();
+            setDateAD(date);
+            setDateAH(date);
+            checkAndSetTimeWithDatabaseManager(date);
+        }
         clearNotifications();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean("firstTime", false)) {
@@ -127,14 +131,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkAndSetTimeWithDatabaseManager() {
+    private void checkAndSetTimeWithDatabaseManager(DateTime date) {
         DatabaseManager.initializeInstance(new DBHelper(this, Global.DB_NAME));
 
         DatabaseManager databaseManager = DatabaseManager.getInstance();
         databaseManager.copyDataBase(this, Global.DB_NAME);
 
         SQLiteDatabase database = databaseManager.openDatabase();
-        String[] time = databaseManager.fetchTime(Global.currentDate(), Global.currentMonth(), database);
+        String[] time = databaseManager.fetchTime(date.formatDate(), date.formatMonth(), database);
 
         renderPrayerTimings(time);
         // database.close(); Don't close it directly!
@@ -152,9 +156,10 @@ public class MainActivity extends AppCompatActivity {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setHijriDate();
-                textViewDateADValue.setText(String.format("%s-%s-%s", Global.currentDate(), Global.currentMonth(), Global.currentYear()));
-                checkAndSetTimeWithDatabaseManager();
+                DateTime date = new DateTime();
+                setDateAD(date);
+                setDateAH(date);
+                checkAndSetTimeWithDatabaseManager(date);
             }
         };
         registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
@@ -180,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
         final boolean is24HourFormat = DateFormat.is24HourFormat(this);
         try {
-            Date currentSystemTime = DateFormats.hour24.parse(DateFormats.hour24.format(new Date()));
+            Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
             for (int index = 0; index < 7; index++) {
                 Date timeToSet = DateFormats.hour24.parse(time[index]);
 
@@ -206,21 +211,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void setHijriDate() {
+    void setDateAD(DateTime date) {
+        textViewDateAD.setText(String.format("%s-%s-%s", date.formatDate(), date.formatMonth(), date.formatYear()));
+    }
+
+    void setDateAH(DateTime date) {
         Chronology isoChronology = ISOChronology.getInstanceUTC();
         Chronology islamicChronology = IslamicChronology.getInstanceUTC();
         LocalDate localDateIso = new LocalDate(
-                Integer.parseInt(Global.currentYear()),
-                Integer.parseInt(Global.currentMonth_MM()),
-                Integer.parseInt(Global.currentDate()),
+                Integer.parseInt(date.formatYear()),
+                Integer.parseInt(date.formatMonth_MM()),
+                Integer.parseInt(date.formatDate()),
                 isoChronology
         );
         LocalDate localDateIslamic = new LocalDate(localDateIso.toDateTimeAtStartOfDay(), islamicChronology);
-        String date = localDateIslamic.toString("dd");
+        String day = localDateIslamic.toString("dd");
         String month = Global.IslamicMonthFullName.get(localDateIslamic.getMonthOfYear());
         String year = localDateIslamic.toString("yyyy");
 
-        textViewDateHijri.setText(String.format("%s-%s-%s", date, month, year));
+        textViewDateAH.setText(String.format("%s-%s-%s", day, month, year));
     }
 //	    Sample code to create Handler/Runnable/Thread
 //		Handler handler = new Handler(this.getMainLooper());
@@ -235,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 //				handler.post(new Runnable() {
 //					@Override
 //					public void run() {
-//						checkNsetTime();
+//						// do something here;
 //					}
 //				});
 //			}
