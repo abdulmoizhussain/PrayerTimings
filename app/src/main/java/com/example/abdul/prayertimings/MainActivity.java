@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver;
     private ColorStateList _defaultColorStateList;
     private static final int _colorCodeGreen = Color.parseColor("#008000");
-    private boolean receiverIsRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         textViewDateAH = findViewById(R.id.textView8);
         _defaultColorStateList = textViewDateAD.getTextColors();
 
-        registerUIUpdater();
+        registerBroadcastReceiver();
 
 /*
 		//FOR DEVICES WHICH HAVE HARDWARE OPTIONS/SETTINGS BUTTONS
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterUIUpdate();
+        unregisterBroadcastReceiver();
     }
 
     @Override
@@ -88,19 +87,19 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean("firstTime", true);
             editor.apply();
         }
-        registerUIUpdater();
+        registerBroadcastReceiver();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterUIUpdate();
+        unregisterBroadcastReceiver();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterUIUpdate();
+        unregisterBroadcastReceiver();
     }
 
     @Override
@@ -152,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void registerUIUpdater() {
+    private void registerBroadcastReceiver() {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -163,14 +162,12 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
-        receiverIsRegistered = true;
     }
 
-    private void unregisterUIUpdate() {
-        if (receiverIsRegistered && broadcastReceiver != null) {
+    private void unregisterBroadcastReceiver() {
+        if (broadcastReceiver != null) {
             unregisterReceiver(broadcastReceiver);
         }
-        receiverIsRegistered = false;
     }
 
     void renderPrayerTimings(String[] time) {

@@ -1,7 +1,6 @@
 package com.example.abdul.prayertimings;
 
 //https://stackoverflow.com/questions/28489238/access-sqlite-database-simultaneously-from-different-threads/28489506
-//
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -176,7 +175,7 @@ class DatabaseManager {
     }
 
     String[] fetchTime(String date, String month, SQLiteDatabase mDatabase) {
-        String temp[] = new String[7];
+        String[] temp = new String[7];
         Cursor cursor = mDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
         cursor.moveToFirst();
         for (int i = 0; i < 7; i++) {
