@@ -75,10 +75,10 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
         switch (key) {
             case "notification_switch":
                 if (sharedPreferences.getBoolean(key, false)) {
-                    Global.cancelNotifications(this);
+                    Global.cancelAllNotifications(this);
                     Global.setNotifications(this);
                 } else {
-                    Global.cancelNotifications(this);
+                    Global.cancelAllNotifications(this);
                 }
                 break;
             case "silence_switch":

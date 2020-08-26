@@ -126,12 +126,12 @@ class Global {
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
     }
 
-    static void cancelNotifications(Context context) {
+    static void cancelAllNotifications(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        for (int i = 0; i < 7; i++) {
+        for (int index = 0; index < 7; index++) {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     context,
-                    i,
+                    index,
                     new Intent(context, NotificationPublisher.class),
                     PendingIntent.FLAG_UPDATE_CURRENT
             );

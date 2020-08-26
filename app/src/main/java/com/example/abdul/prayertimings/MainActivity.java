@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkAndSetNotifications() {
         if (Global.getNotificationFlag(this)) {
-            Global.cancelNotifications(this);
+            Global.cancelAllNotifications(this);
             Global.setNotifications(this);
         }
     }

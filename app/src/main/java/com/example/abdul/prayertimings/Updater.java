@@ -13,7 +13,7 @@ public class Updater extends BroadcastReceiver {
 //        }
 
         if (Global.getNotificationFlag(context)) {
-            Global.cancelNotifications(context);
+            Global.cancelAllNotifications(context);
             Global.setNotifications(context);
         }
 
