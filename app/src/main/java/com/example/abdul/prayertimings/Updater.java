@@ -14,7 +14,7 @@ public class Updater extends BroadcastReceiver {
 
         if (Global.getNotificationFlag(context)) {
             Global.cancelAllNotifications(context);
-            Global.setNotifications(context);
+            Global.scheduleNotifications(context);
         }
 
         if (Global.getSilenceFlag(context)) {

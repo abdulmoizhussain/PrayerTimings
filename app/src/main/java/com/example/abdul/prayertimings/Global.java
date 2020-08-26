@@ -81,15 +81,15 @@ class Global {
     }
 
     static String formatThisTime(Context context, Long time) {
-        if (time == 0)
+        if (time == 0) {
             return "Have not set.";
-
+        }
         SimpleDateFormat simpleDateFormat = (SimpleDateFormat) (DateFormat.is24HourFormat(context) ? DateFormats.hour24.clone() : DateFormats.hour12.clone());
         simpleDateFormat.setTimeZone(Global.timeZoneGmt);
         return simpleDateFormat.format(new Date(time));
     }
 
-    public static void setNotifications(Context context) {
+    public static void scheduleNotifications(Context context) {
         DBHelper mDBHelper = new DBHelper(context, Global.DB_NAME);
         DateTime date = new DateTime();
         String[] time = mDBHelper.fetchTime(date.formatDate(), date.formatMonth());
@@ -102,7 +102,7 @@ class Global {
                 if (timeToSet.after(currentSystemTime) /*|| timeToSet.equals(currentSystemTime)*/) {
                     assert currentSystemTime != null;
                     long delay = timeToSet.getTime() - currentSystemTime.getTime();
-                    makeNotifications(index, delay, context);
+                    makeNotificationPendingIntentWithRequestCode(context, index, delay);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -111,7 +111,7 @@ class Global {
         mDBHelper.close();
     }
 
-    private static void makeNotifications(int index, long delay, Context context) {
+    private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
         Intent alertIntent = new Intent(context, NotificationPublisher.class);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long alertTime = Global.getCurrentTimeMillis() + delay;

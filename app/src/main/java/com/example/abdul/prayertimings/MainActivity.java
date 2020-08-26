@@ -39,11 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.settings_screen, true);
 
-        textViewDateAD = findViewById(R.id.textView15);
-        textViewDateAH = findViewById(R.id.textView8);
+        textViewDateAD = findViewById(R.id.textViewAdValue);
+        textViewDateAH = findViewById(R.id.textViewAhValue);
         _defaultColorStateList = textViewDateAD.getTextColors();
-
-        registerBroadcastReceiver();
 
 /*
 		//FOR DEVICES WHICH HAVE HARDWARE OPTIONS/SETTINGS BUTTONS
@@ -61,11 +59,6 @@ public class MainActivity extends AppCompatActivity {
 */
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterBroadcastReceiver();
-    }
 
     @Override
     protected void onResume() {
@@ -76,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             setDateAH(date);
             checkAndSetTimeWithDatabaseManager(date);
         }
-        clearNotifications();
+        clearNotificationsFromShutter();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean("firstTime", false)) {
             //----\  /---
@@ -90,16 +83,11 @@ public class MainActivity extends AppCompatActivity {
         registerBroadcastReceiver();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterBroadcastReceiver();
-    }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
         unregisterBroadcastReceiver();
+        super.onPause();
     }
 
     @Override
@@ -122,11 +110,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void clearNotifications() {
-        for (int ID = 0; ID < 7; ID++) {
+    void clearNotificationsFromShutter() {
+        for (int index = 0; index < 7; index++) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert notificationManager != null;
-            notificationManager.cancel(ID);
+            if (notificationManager != null) {
+                notificationManager.cancel(index);
+            }
         }
     }
 
@@ -147,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkAndSetNotifications() {
         if (Global.getNotificationFlag(this)) {
             Global.cancelAllNotifications(this);
-            Global.setNotifications(this);
+            Global.scheduleNotifications(this);
         }
     }
 

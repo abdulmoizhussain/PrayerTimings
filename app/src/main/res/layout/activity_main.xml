@@ -203,7 +203,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
     <TextView
-        android:id="@+id/textView15"
+        android:id="@+id/textViewAdValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textViewIshaLabel"
@@ -219,7 +219,7 @@
         tools:ignore="NotSibling" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/textViewAhValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
