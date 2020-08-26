@@ -58,11 +58,11 @@ class Global {
     }
 
 
-    static boolean getSilenceFlag(Context context) {
+    public static boolean getSilenceFlag(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("silence_switch", false);
     }
 
-    static boolean getNotificationFlag(Context context) {
+    public static boolean getNotificationFlag(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("notification_switch", false);
     }
 
@@ -72,7 +72,7 @@ class Global {
      *
      * @return current time in milliseconds.
      */
-    static long getCurrentTimeMillis() {
+    public static long getCurrentTimeMillis() {
         long remainder, currentTimeMillis;
         remainder = currentTimeMillis = System.currentTimeMillis();
         remainder %= 60000;
@@ -80,7 +80,7 @@ class Global {
         return currentTimeMillis;
     }
 
-    static String formatThisTime(Context context, Long time) {
+    public static String formatThisTime(Context context, Long time) {
         if (time == 0) {
             return "Have not set.";
         }
@@ -126,7 +126,7 @@ class Global {
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
     }
 
-    static void cancelAllNotifications(Context context) {
+    public static void cancelAllNotifications(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         for (int index = 0; index < 7; index++) {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
@@ -140,7 +140,6 @@ class Global {
             }
         }
     }
-
 
     public static String formatThisTimeIn24(Long time) {
         SimpleDateFormat simpleDateFormat = (SimpleDateFormat) DateFormats.hour24.clone();

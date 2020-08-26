@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 */
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -82,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
         }
         registerBroadcastReceiver();
     }
-
 
     @Override
     protected void onPause() {
@@ -110,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void clearNotificationsFromShutter() {
+    private void clearNotificationsFromShutter() {
         for (int index = 0; index < 7; index++) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
@@ -159,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void renderPrayerTimings(String[] time) {
+    private void renderPrayerTimings(String[] time) {
         TextView[] view = new TextView[7];
         view[0] = findViewById(R.id.textViewFajarTime);
         view[1] = findViewById(R.id.textViewFajarEndsTime);
@@ -197,11 +195,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void setDateAD(DateTime date) {
+    private void setDateAD(DateTime date) {
         textViewDateAD.setText(String.format("%s-%s-%s", date.formatDate(), date.formatMonth(), date.formatYear()));
     }
 
-    void setDateAH(DateTime date) {
+    private void setDateAH(DateTime date) {
         Chronology isoChronology = ISOChronology.getInstanceUTC();
         Chronology islamicChronology = IslamicChronology.getInstanceUTC();
         LocalDate localDateIso = new LocalDate(

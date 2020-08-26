@@ -36,7 +36,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         }
     }
 
-    void publishNotification(Context context, int ID, String contentText, long setWhen) {
+    private void publishNotification(Context context, int ID, String contentText, long setWhen) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(MainActivity.class);
