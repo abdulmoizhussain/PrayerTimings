@@ -90,9 +90,9 @@ class Global {
     }
 
     public static void scheduleNotifications(Context context) {
-        DBHelper mDBHelper = new DBHelper(context, Global.DB_NAME);
+        DBHelper dbHelper = new DBHelper(context, Global.DB_NAME);
         DateTime date = new DateTime();
-        String[] time = mDBHelper.fetchTime(date.formatDate(), date.formatMonth());
+        String[] time = dbHelper.fetchTime(date.formatDate(), date.formatMonth());
         for (int index = 0; index < 7; index++) {
             try {
                 Date timeToSet = DateFormats.hour24.parse(time[index]);
@@ -108,7 +108,7 @@ class Global {
                 e.printStackTrace();
             }
         }
-        mDBHelper.close();
+        dbHelper.close();
     }
 
     private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
