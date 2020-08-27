@@ -40,11 +40,10 @@ public class DatabaseManager {
         return databaseManager;
     }
 
-    public synchronized SQLiteDatabase openDatabase() {
+    public synchronized void openDatabase() {
         if (atomicInteger.incrementAndGet() == 1) {
             sqLiteDatabase = sqLiteOpenHelper.getReadableDatabase();
         }
-        return sqLiteDatabase;
     }
 
     public synchronized void closeDatabase() {
@@ -53,7 +52,7 @@ public class DatabaseManager {
         }
     }
 
-    void copyDataBase(Context context, String databaseName) {
+    public void copyDataBase(Context context, String databaseName) {
         String databasePath;
         if (android.os.Build.VERSION.SDK_INT >= 17) {
             databasePath = context.getApplicationInfo().dataDir + "/databases/";
@@ -82,7 +81,7 @@ public class DatabaseManager {
         }
     }
 
-    public String[] fetchTime(SQLiteDatabase sqLiteDatabase, String date, String month) {
+    public String[] fetchTime(String date, String month) {
         String[] timeStrings = new String[7];
         Cursor cursor = sqLiteDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
         cursor.moveToFirst();

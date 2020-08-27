@@ -119,16 +119,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkAndSetTimeWithDatabaseManager(DateTime date) {
         DatabaseManager.initializeInstance(new DBHelper(this, Global.DB_NAME));
-
         DatabaseManager databaseManager = DatabaseManager.getInstance();
         databaseManager.copyDataBase(this, Global.DB_NAME);
-
-        SQLiteDatabase database = databaseManager.openDatabase();
-        String[] time = databaseManager.fetchTime(database, date.formatDate(), date.formatMonth());
-
+        databaseManager.openDatabase();
+        String[] time = databaseManager.fetchTime(date.formatDate(), date.formatMonth());
+        databaseManager.closeDatabase();
         renderPrayerTimings(time);
-        // database.close(); Don't close it directly!
-        databaseManager.closeDatabase(); // correct way
     }
 
     private void checkAndSetNotifications() {
