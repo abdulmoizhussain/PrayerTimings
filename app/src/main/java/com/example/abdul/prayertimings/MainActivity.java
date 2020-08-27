@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         databaseManager.copyDataBase(this, Global.DB_NAME);
 
         SQLiteDatabase database = databaseManager.openDatabase();
-        String[] time = databaseManager.fetchTime(date.formatDate(), date.formatMonth(), database);
+        String[] time = databaseManager.fetchTime(database, date.formatDate(), date.formatMonth());
 
         renderPrayerTimings(time);
         // database.close(); Don't close it directly!

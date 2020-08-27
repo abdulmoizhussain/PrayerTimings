@@ -2,6 +2,7 @@ package com.example.abdul.prayertimings;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -16,8 +17,8 @@ import android.widget.Toast;
 public class PreferenceClass extends PreferenceActivity implements OnSharedPreferenceChangeListener, Preference.OnPreferenceClickListener {
     private int id, minute, hour;
     SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
-    Preference[] preference = new Preference[5];
+    SharedPreferences.Editor sharedPreferencesEditor;
+    Preference[] preferences = new Preference[5];
     ListPreference listPreference;
 
     @Override
@@ -25,21 +26,21 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings_screen);
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-        this.listPreference = (ListPreference) findPreference("silence_duration");
-        this.sharedPreferences = this.getSharedPreferences("silence_timings", 0);
-        this.editor = sharedPreferences.edit();
-        editor.apply();
+        listPreference = (ListPreference) findPreference("silence_duration");
+        sharedPreferences = this.getSharedPreferences("silence_timings", Context.MODE_PRIVATE);
+        sharedPreferencesEditor = sharedPreferences.edit();
+        sharedPreferencesEditor.apply();
         //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         //SharedPreferences prefs = this.getSharedPreferences("silence_switch", Context.MODE_PRIVATE);
         //prefs.getBoolean("language", true);
         //sharedPreferences.getBoolean("silence_switch", true);
-        this.preference[0] = findPreference("fajr");
-        this.preference[1] = findPreference("zuhur");
-        this.preference[2] = findPreference("asr");
-        this.preference[3] = findPreference("maghrib");
-        this.preference[4] = findPreference("isha");
-        for (int i = 0; i < 5; i++) {
-            this.preference[i].setOnPreferenceClickListener(this);
+        preferences[0] = findPreference("fajr");
+        preferences[1] = findPreference("zuhur");
+        preferences[2] = findPreference("asr");
+        preferences[3] = findPreference("maghrib");
+        preferences[4] = findPreference("isha");
+        for (int index = 0; index < 5; index++) {
+            preferences[index].setOnPreferenceClickListener(this);
         }
         checkAndSetSilenceSwitch();
     }
@@ -83,9 +84,9 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
                 break;
 
             case "silence_duration":
-                this.editor.putInt(key, Integer.parseInt(this.listPreference.getValue()));
-                this.editor.apply();
-                this.listPreference.setSummary(this.listPreference.getEntry());
+                sharedPreferencesEditor.putInt(key, Integer.parseInt(listPreference.getValue()));
+                sharedPreferencesEditor.apply();
+                listPreference.setSummary(listPreference.getEntry());
                 Global.setToSilentMode(PreferenceClass.this);
         }
     }
@@ -102,9 +103,9 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
             silence_category.setEnabled(false);
         }
 
-        this.listPreference.setSummary(this.sharedPreferences.getInt("silence_duration", 10) + " minutes");
+        listPreference.setSummary(this.sharedPreferences.getInt("silence_duration", 10) + " minutes");
         for (int index = 0; index < 5; index++) {
-            this.preference[index].setSummary(Global.formatThisTime(this, loadLong(index + 11)));
+            preferences[index].setSummary(Global.formatThisTime(this, loadLong(index + 11)));
         }
     }
 
@@ -124,7 +125,7 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
             minute = minuteOfDay;
             hour = hourOfDay;
             saveLong(id);
-            preference[id - 11].setSummary(Global.formatThisTime(PreferenceClass.this, loadLong(id)));
+            preferences[id - 11].setSummary(Global.formatThisTime(PreferenceClass.this, loadLong(id)));
             Global.setToSilentMode(PreferenceClass.this);
         }
     };
@@ -134,11 +135,11 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
         hour = hour * 60 * 60 * 1000;
         //SharedPreferences prefs = PreferenceClass.this.getSharedPreferences("silence_timings", 0);
         //SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(Integer.toString(longID), (minute + hour));
+        sharedPreferencesEditor.putLong(Integer.toString(longID), (minute + hour));
 		/*editor.putInt(longName+"_size", longArray.length);
 		for(int i=0; i<longArray.length; i++)
 			editor.putLong (longName +"_"+i, longArray[i]);*/
-        editor.apply();
+        sharedPreferencesEditor.apply();
     }
 
     private Long loadLong(int longID) {

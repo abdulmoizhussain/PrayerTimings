@@ -3,8 +3,8 @@ package com.example.abdul.prayertimings;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.io.File;
@@ -19,48 +19,55 @@ import java.io.OutputStream;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    private final String databaseName;
-    private final String databasePath;
+    private final String databaseName, databasePath;
     private final Context context;
     private SQLiteDatabase sqLiteDatabase;
 
-    DBHelper(Context context, String databaseName) {
+    public DBHelper(Context context, String databaseName) {
         super(context, databaseName, null, 1);
-        this.databaseName = databaseName;
         this.context = context;
+        this.databaseName = databaseName;
 
         if (android.os.Build.VERSION.SDK_INT >= 17) {
-            this.databasePath = context.getApplicationInfo().dataDir + "/databases/";
+            databasePath = context.getApplicationInfo().dataDir + "/databases/";
         } else {
-            ContextWrapper cw = new ContextWrapper(context.getApplicationContext());
-            this.databasePath = cw.getFilesDir().getParent() + "/databases/";
+            ContextWrapper contextWrapper = new ContextWrapper(context.getApplicationContext());
+            databasePath = contextWrapper.getFilesDir().getParent() + "/databases/";
         }
     }
 
-    private void openDataBase() throws SQLException {
-        String myPath = this.databasePath + this.databaseName;
-        if (this.sqLiteDatabase != null && this.sqLiteDatabase.isOpen()) {
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
+    private void openDataBase() throws SQLiteException {
+        String completeDatabasePath = databasePath + databaseName;
+        if (sqLiteDatabase != null && sqLiteDatabase.isOpen()) {
             return;
         }
-        this.sqLiteDatabase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+        sqLiteDatabase = SQLiteDatabase.openDatabase(completeDatabasePath, null, SQLiteDatabase.OPEN_READONLY);
     }
 
     private void closeDatabase() {
-        if (this.sqLiteDatabase != null) {
-            this.sqLiteDatabase.close();
+        if (sqLiteDatabase != null) {
+            sqLiteDatabase.close();
         }
     }
 
-    String copyDataBase() {
+    public String copyDataBase() {
         try {
-            File database = this.context.getApplicationContext().getDatabasePath(this.databaseName);
+            File database = context.getApplicationContext().getDatabasePath(databaseName);
             if (!database.exists()) {
                 this.getReadableDatabase();
                 try {
                     int length;
                     byte[] byteArrayBuffer = new byte[1024];
-                    OutputStream outputStream = new FileOutputStream(this.databasePath + this.databaseName);
-                    InputStream inputStream = this.context.getAssets().open(this.databaseName);
+                    OutputStream outputStream = new FileOutputStream(databasePath + databaseName);
+                    InputStream inputStream = context.getAssets().open(databaseName);
                     while ((length = inputStream.read(byteArrayBuffer)) > 0) {
                         outputStream.write(byteArrayBuffer, 0, length);
                     }
@@ -82,30 +89,17 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    String[] fetchTime(String date, String month) {
-        String temp[] = new String[7];
-        try {
-            openDataBase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        //Cursor cursor = this.myDataBase.query (month, null, date, null, null, null, null); //not working in order
-        Cursor cursor = this.sqLiteDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
+    public String[] fetchTime(String date, String month) {
+        String[] timeStrings = new String[7];
+        openDataBase();
+        //Cursor cursor = sqLiteDatabase.query(month, null, date, null, null, null, null); // not working in order
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
         cursor.moveToFirst();
-        for (int i = 0; i < 7; i++) {
-            temp[i] = cursor.getString(i + 1);
+        for (int index = 0; index < 7; index++) {
+            timeStrings[index] = cursor.getString(index + 1);
         }
-        //temp[7] = Integer.toString(cursor1.getCount());
         cursor.close();
         closeDatabase();
-        return temp;
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        return timeStrings;
     }
 }
