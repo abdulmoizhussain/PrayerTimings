@@ -44,7 +44,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    private void openDataBase() throws SQLiteException {
+    private void openDatabase() throws SQLiteException {
         String completeDatabasePath = databasePath + databaseName;
         if (sqLiteDatabase != null && sqLiteDatabase.isOpen()) {
             return;
@@ -91,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public String[] fetchTime(String date, String month) {
         String[] timeStrings = new String[7];
-        openDataBase();
+        openDatabase();
         //Cursor cursor = sqLiteDatabase.query(month, null, date, null, null, null, null); // not working in order
         Cursor cursor = sqLiteDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
         cursor.moveToFirst();
