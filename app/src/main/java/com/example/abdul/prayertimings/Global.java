@@ -8,8 +8,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 
+import com.example.abdul.prayertimings.services.PrayerTimeService;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,10 +26,15 @@ import java.util.TimeZone;
  */
 
 class Global {
-    public static final String DB_NAME = "Karachi.sqlite";
     public static final Map<Integer, String> IslamicMonthFullName;
     public static final Map<Integer, String> NotificationMessage;
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
+    public static final Collection<String> IntentActions = Collections.unmodifiableList(Arrays.asList(
+            Intent.ACTION_DATE_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED
+    ));
 
     static {
         {
@@ -86,13 +95,13 @@ class Global {
         }
         SimpleDateFormat simpleDateFormat = (SimpleDateFormat) (DateFormat.is24HourFormat(context) ? DateFormats.hour24.clone() : DateFormats.hour12.clone());
         simpleDateFormat.setTimeZone(Global.timeZoneGmt);
-        return simpleDateFormat.format(new Date(time));
+        return simpleDateFormat.format(new DateTime(time));
     }
 
     public static void scheduleNotifications(Context context) {
-        DBHelper dbHelper = new DBHelper(context, Global.DB_NAME);
-        DateTime date = new DateTime();
-        String[] time = dbHelper.fetchTime(date.formatDate(), date.formatMonth());
+        PrayerTimeService prayerTimeService = new PrayerTimeService(context);
+        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth();
+
         for (int index = 0; index < 7; index++) {
             try {
                 Date timeToSet = DateFormats.hour24.parse(time[index]);
@@ -108,7 +117,6 @@ class Global {
                 e.printStackTrace();
             }
         }
-        dbHelper.close();
     }
 
     private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
@@ -144,15 +152,16 @@ class Global {
     public static String formatThisTimeIn24(Long time) {
         SimpleDateFormat simpleDateFormat = (SimpleDateFormat) DateFormats.hour24.clone();
         simpleDateFormat.setTimeZone(Global.timeZoneGmt);
-        return simpleDateFormat.format(new Date(time));
+        return simpleDateFormat.format(new DateTime(time));
     }
 
     public static void setToSilentMode(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("silence_timings", 0);
         for (int i = 11; i < 16; i++) {
             try {
-                if (prefs.getLong(Integer.toString(i), 0) == 0)
+                if (prefs.getLong(Integer.toString(i), 0) == 0) {
                     continue;
+                }
                 Date currentTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
                 Date silenceTime = DateFormats.hour24.parse(Global.formatThisTimeIn24(prefs.getLong(Integer.toString(i), 0)));
 
@@ -160,7 +169,7 @@ class Global {
                 if (currentTime.before(silenceTime)) {
                     assert silenceTime != null;
                     long silencerTime = Global.getCurrentTimeMillis() + silenceTime.getTime() - currentTime.getTime();
-                    Intent intent1 = new Intent(context, MobileSilencer.class);
+                    Intent intent1 = new Intent(context, TurnToSilentModeBroadcastReceiver.class);
                     intent1.putExtra("switchCase", "toSilent");
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, i, intent1,

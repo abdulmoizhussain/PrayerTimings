@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,6 +16,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.abdul.prayertimings.services.PrayerTimeService;
 
 import org.joda.time.Chronology;
 import org.joda.time.LocalDate;
@@ -29,8 +30,8 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     private TextView textViewDateAD, textViewDateAH;
     private BroadcastReceiver broadcastReceiver;
-    private ColorStateList _defaultColorStateList;
-    private static final int _colorCodeGreen = Color.parseColor("#008000");
+    private ColorStateList defaultColorStateList;
+    private static final int colorCodeGreen = Color.parseColor("#008000");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewDateAD = findViewById(R.id.textViewAdValue);
         textViewDateAH = findViewById(R.id.textViewAhValue);
-        _defaultColorStateList = textViewDateAD.getTextColors();
+        defaultColorStateList = textViewDateAD.getTextColors();
 
 /*
 		//FOR DEVICES WHICH HAVE HARDWARE OPTIONS/SETTINGS BUTTONS
@@ -118,13 +119,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAndSetTimeWithDatabaseManager(DateTime date) {
-        DatabaseManager.initializeInstance(new DBHelper(this, Global.DB_NAME));
-        DatabaseManager databaseManager = DatabaseManager.getInstance();
-        databaseManager.copyDataBase(this, Global.DB_NAME);
-        databaseManager.openDatabase();
-        String[] time = databaseManager.fetchTime(date.formatDate(), date.formatMonth());
-        databaseManager.closeDatabase();
-        renderPrayerTimings(time);
+        PrayerTimeService prayerTimeService = new PrayerTimeService(this);
+        renderPrayerTimings(prayerTimeService.getPrayerTimeOfThisDayAndMonth());
     }
 
     private void checkAndSetNotifications() {
@@ -176,13 +172,13 @@ public class MainActivity extends AppCompatActivity {
                     view[index].setText(timeString);
                 }
 
-                view[index].setTextColor(_defaultColorStateList);
+                view[index].setTextColor(defaultColorStateList);
                 if (currentSystemTime.after(timeToSet) || currentSystemTime.equals(timeToSet) || currentSystemTime.before(DateFormats.hour24.parse(time[0]))) {
-                    view[index].setTextColor(_colorCodeGreen);
+                    view[index].setTextColor(colorCodeGreen);
                     if ((index - 1) > -1) {
-                        view[index - 1].setTextColor(_defaultColorStateList);
+                        view[index - 1].setTextColor(defaultColorStateList);
                     } else {
-                        view[6].setTextColor(_defaultColorStateList);
+                        view[6].setTextColor(defaultColorStateList);
                     }
                 }
             }
@@ -211,23 +207,4 @@ public class MainActivity extends AppCompatActivity {
 
         textViewDateAH.setText(String.format("%s-%s-%s", day, month, year));
     }
-//	    Sample code to create Handler/Runnable/Thread
-//		Handler handler = new Handler(this.getMainLooper());
-//		Runnable runnable = new Runnable() {
-//			@Override
-//			public void run () {
-//				try {
-//					Thread.sleep(1000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//				handler.post(new Runnable() {
-//					@Override
-//					public void run() {
-//						// do something here;
-//					}
-//				});
-//			}
-//		};
-//		new Thread(runnable).start();
 }

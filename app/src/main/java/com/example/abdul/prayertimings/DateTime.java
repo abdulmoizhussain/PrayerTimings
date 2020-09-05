@@ -4,7 +4,15 @@ import java.util.Date;
 
 public class DateTime extends Date {
 
-    public String formatDate() {
+    public DateTime() {
+        super();
+    }
+
+    public DateTime(long date) {
+        super(date);
+    }
+
+    public final String formatDate() {
         return DateFormats.dd.format(this);
     }
 
@@ -12,15 +20,15 @@ public class DateTime extends Date {
         return DateFormats.MMMM.format(this);
     }
 
-    public String formatMonth_MM() {
+    public final String formatMonth_MM() {
         return DateFormats.MM.format(this);
     }
 
-    public String formatYear() {
+    public final String formatYear() {
         return DateFormats.yyyy.format(this);
     }
 
-    public String formatIn24Hour() {
+    public final String formatIn24Hour() {
         return DateFormats.hour24.format(this);
     }
 }

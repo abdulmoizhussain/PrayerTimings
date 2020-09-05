@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
@@ -28,25 +29,28 @@ public class NotificationPublisher extends BroadcastReceiver {
                 Date timeToCheck = DateFormats.hour24.parse(DateFormats.hour24.format(setWhen));
                 Date timeToCheck1 = DateFormats.hour24.parse(DateFormats.hour24.format(setWhen + 3000));
 
-                if (currentSystemTime.equals(timeToCheck) || currentSystemTime.equals(timeToCheck1))
+                assert currentSystemTime != null;
+                if (currentSystemTime.equals(timeToCheck) || currentSystemTime.equals(timeToCheck1)) {
                     publishNotification(context, ID, contentText, setWhen);
+                }
             } catch (ParseException e) {
                 e.printStackTrace();
+                Toast.makeText(context, "Unable to parse time while publishing notification.", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    private void publishNotification(Context context, int ID, String contentText, long setWhen) {
+    private void publishNotification(Context context, int notificationId, String contentText, long setWhen) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(notificationIntent);
 
-        PendingIntent pendingIntent = stackBuilder.getPendingIntent(ID, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(notificationId, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.abc);
+        Bitmap appIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.app_icon);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "DefaultNotificationChannel");
         Notification notification = builder
                 .setContentTitle(context.getResources().getString(R.string.app_name))
                 .setContentText(contentText)
@@ -55,18 +59,19 @@ public class NotificationPublisher extends BroadcastReceiver {
                 //.setDefaults(NotificationCompat.DEFAULT_SOUND)
                 .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
                 //.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
-                .setSmallIcon(R.drawable.abc)
-                .setLargeIcon(bm)
+                .setLargeIcon(appIcon)
+                .setSmallIcon(R.drawable.app_icon)
                 //.setLights(Color.RED, 0, 1)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .setWhen(setWhen)
-                //.setShowWhen(false)
+                .setShowWhen(true)
                 .build();
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
         if (notificationManager != null) {
-            notificationManager.cancel(ID);
-            notificationManager.notify(ID, notification);
+            notificationManager.cancel(notificationId);
+            notificationManager.notify(notificationId, notification);
         }
     }
 }

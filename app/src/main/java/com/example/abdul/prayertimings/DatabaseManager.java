@@ -2,17 +2,22 @@ package com.example.abdul.prayertimings;
 
 //https://stackoverflow.com/questions/28489238/access-sqlite-database-simultaneously-from-different-threads/28489506
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,67 +31,113 @@ public class DatabaseManager {
     private static SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase sqLiteDatabase;
 
-    public static synchronized void initializeInstance(SQLiteOpenHelper sqLiteOpenHelper) {
+    public static synchronized DatabaseManager getInstance(Context context) {
         if (databaseManager == null) {
             databaseManager = new DatabaseManager();
-            DatabaseManager.sqLiteOpenHelper = sqLiteOpenHelper;
-        }
-    }
-
-    public static synchronized DatabaseManager getInstance() {
-        if (databaseManager == null) {
-            throw new IllegalStateException(DatabaseManager.class.getSimpleName() + " is not initialized, call initializeInstance(..) method first.");
+            sqLiteOpenHelper = new DatabaseHelper(context);
         }
         return databaseManager;
     }
 
-    public synchronized void openDatabase() {
+    public final synchronized void openDatabase() {
         if (atomicInteger.incrementAndGet() == 1) {
-            sqLiteDatabase = sqLiteOpenHelper.getReadableDatabase();
+            sqLiteDatabase = sqLiteOpenHelper.getWritableDatabase();
         }
     }
 
-    public synchronized void closeDatabase() {
+    public final synchronized void closeDatabase() {
         if (atomicInteger.decrementAndGet() == 0) {
             sqLiteDatabase.close();
         }
     }
 
-    public void copyDataBase(Context context, String databaseName) {
-        String databasePath;
-        if (android.os.Build.VERSION.SDK_INT >= 17) {
-            databasePath = context.getApplicationInfo().dataDir + "/databases/";
-        } else {
-            ContextWrapper contextWrapper = new ContextWrapper(context.getApplicationContext());
-            databasePath = contextWrapper.getFilesDir().getParent() + "/databases/";
+    public synchronized boolean databaseIsEmpty() {
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT EXISTS(SELECT * FROM " + DatabaseHelper.TableNames.PrayerTime + " WHERE ID=1)", null);
+        int result = 0;
+        if (cursor.moveToFirst()) {
+            result = cursor.getInt(0);
         }
-
-        File databaseFile = context.getApplicationContext().getDatabasePath(databaseName);
-        if (!databaseFile.exists()) {
-            sqLiteOpenHelper.getReadableDatabase();
-            try {
-                int length;
-                byte[] buffer = new byte[1024];
-                OutputStream outputStream = new FileOutputStream(databasePath + databaseName);
-                InputStream inputStream = context.getAssets().open(databaseName);
-                while ((length = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, length);
-                }
-                outputStream.flush();
-                outputStream.close();
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        cursor.close();
+        return result == 0;
     }
 
-    public String[] fetchTime(String date, String month) {
-        String[] timeStrings = new String[7];
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + month + " where Date=" + date + ";", null);
-        cursor.moveToFirst();
-        for (int index = 0; index < 7; index++) {
-            timeStrings[index] = cursor.getString(index + 1);
+    public synchronized void insertPrayerTimes(JSONArray jsonArray) throws JSONException {
+        int length = jsonArray.length();
+        sqLiteDatabase.beginTransaction();
+
+        for (int index = 0; index < length; index++) {
+            JSONObject prayerTime = jsonArray.getJSONObject(index);
+            ContentValues contentValues = new ContentValues();
+
+            contentValues.put(DatabaseHelper.ColumnNames.City, prayerTime.getString("City"));
+            contentValues.put(DatabaseHelper.ColumnNames.Month, prayerTime.getInt("Month"));
+            contentValues.put(DatabaseHelper.ColumnNames.Date, prayerTime.getInt("Date"));
+            contentValues.put(DatabaseHelper.ColumnNames.Fajr, prayerTime.getString("Fajr"));
+            contentValues.put(DatabaseHelper.ColumnNames.Sunrise, prayerTime.getString("Sunrise"));
+            contentValues.put(DatabaseHelper.ColumnNames.Zawal, prayerTime.getString("Zawal"));
+            contentValues.put(DatabaseHelper.ColumnNames.Zuhur, prayerTime.getString("Zuhur"));
+            contentValues.put(DatabaseHelper.ColumnNames.Asr, prayerTime.getString("Asr"));
+            contentValues.put(DatabaseHelper.ColumnNames.Maghrib, prayerTime.getString("Maghrib"));
+            contentValues.put(DatabaseHelper.ColumnNames.Isha, prayerTime.getString("Isha"));
+
+            sqLiteDatabase.insert(DatabaseHelper.TableNames.PrayerTime, null, contentValues);
+        }
+        sqLiteDatabase.setTransactionSuccessful();
+        sqLiteDatabase.endTransaction();
+    }
+
+    public synchronized boolean failsToInsertInitialDataIntoDatabase(Context context) {
+        String jsonString;
+        try {
+            InputStream inputStream = context.getAssets().open("Karachi.json");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            StringBuilder stringBuilder = new StringBuilder();
+            String readLine;
+            while ((readLine = bufferedReader.readLine()) != null)
+                stringBuilder.append(readLine);
+            inputStream.close();
+            jsonString = stringBuilder.toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Toast.makeText(context, "Unable to read initial data file from assets.", Toast.LENGTH_LONG).show();
+            return true;
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            insertPrayerTimes(jsonArray);
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            Toast.makeText(context, "Unable to parse initial-data-file from assets.", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized final String[] fetchPrayerTimeOfADayOfKarachi(int month, int date) {
+        final int totalColumns = 7;
+        final String[] timeStrings = new String[totalColumns];
+        final Cursor cursor = sqLiteDatabase.rawQuery(
+                "SELECT " +
+                        DatabaseHelper.ColumnNames.Fajr + ", " +
+                        DatabaseHelper.ColumnNames.Sunrise + ", " +
+                        DatabaseHelper.ColumnNames.Zawal + ", " +
+                        DatabaseHelper.ColumnNames.Zuhur + ", " +
+                        DatabaseHelper.ColumnNames.Asr + ", " +
+                        DatabaseHelper.ColumnNames.Maghrib + ", " +
+                        DatabaseHelper.ColumnNames.Isha +
+                        " FROM " + DatabaseHelper.TableNames.PrayerTime +
+                        " WHERE " +
+                        DatabaseHelper.ColumnNames.City + "='Karachi'" +
+                        " AND " +
+                        DatabaseHelper.ColumnNames.Month + "=" + month +
+                        " AND " + DatabaseHelper.ColumnNames.Date + "=" + date,
+                null
+        );
+        if (cursor.moveToFirst()) {
+            for (int index = 0; index < totalColumns; index++) {
+                timeStrings[index] = cursor.getString(index);
+            }
         }
         cursor.close();
         return timeStrings;
