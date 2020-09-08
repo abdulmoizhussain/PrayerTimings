@@ -74,9 +74,9 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
             case "notification_switch":
-                Global.cancelAllNotifications(this);
+                Global.cancelAllScheduledNotificationsOfThisDay(this);
                 if (sharedPreferences.getBoolean(key, false)) {
-                    Global.scheduleNotifications(this);
+                    Global.scheduleNotificationsOfAllPrayerTimesForThisDay(this);
                 }
                 break;
             case "silence_switch":
@@ -114,8 +114,8 @@ public class PreferenceClass extends PreferenceActivity implements OnSharedPrefe
     }
 
     @Override
-    protected Dialog onCreateDialog(int id_) {
-        id = id_;
+    protected Dialog onCreateDialog(int id) {
+        this.id = id;
         return timePickerDialog();
     }
 

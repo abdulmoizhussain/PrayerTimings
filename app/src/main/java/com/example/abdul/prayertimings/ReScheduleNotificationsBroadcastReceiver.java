@@ -9,8 +9,8 @@ public class ReScheduleNotificationsBroadcastReceiver extends BroadcastReceiver 
     public void onReceive(Context context, Intent intent) {
         if (Global.IntentActions.contains(intent.getAction())) {
             if (Global.getNotificationFlag(context)) {
-                Global.cancelAllNotifications(context);
-                Global.scheduleNotifications(context);
+                Global.cancelAllScheduledNotificationsOfThisDay(context);
+                Global.scheduleNotificationsOfAllPrayerTimesForThisDay(context);
             }
 
             if (Global.getSilenceFlag(context)) {

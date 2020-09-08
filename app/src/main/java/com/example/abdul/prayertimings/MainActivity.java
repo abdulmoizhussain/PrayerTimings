@@ -69,12 +69,12 @@ public class MainActivity extends AppCompatActivity {
             setDateAH(date);
             checkAndSetTimeWithDatabaseManager(date);
         }
-        clearNotificationsFromShutter();
+        clearAllNotificationsFromShutter();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean("firstTime", false)) {
             //----\  /---
             // ----\/---- run your one time code here
-            checkAndSetNotifications();
+            checkAndScheduleNotifications();
             // mark first time has run.
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("firstTime", true);
@@ -109,24 +109,23 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void clearNotificationsFromShutter() {
+    private void clearAllNotificationsFromShutter() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         for (int index = 0; index < 7; index++) {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                notificationManager.cancel(index);
-            }
+            notificationManager.cancel(index);
         }
     }
 
-    private void checkAndSetTimeWithDatabaseManager(DateTime date) {
+    private void checkAndSetTimeWithDatabaseManager(DateTime dateTime) {
         PrayerTimeService prayerTimeService = new PrayerTimeService(this);
-        renderPrayerTimings(prayerTimeService.getPrayerTimeOfThisDayAndMonth());
+        renderPrayerTimings(prayerTimeService.getPrayerTimeOfThisDayAndMonth(dateTime));
     }
 
-    private void checkAndSetNotifications() {
+    private void checkAndScheduleNotifications() {
         if (Global.getNotificationFlag(this)) {
-            Global.cancelAllNotifications(this);
-            Global.scheduleNotifications(this);
+            Global.cancelAllScheduledNotificationsOfThisDay(this);
+            Global.scheduleNotificationsOfAllPrayerTimesForThisDay(this);
         }
     }
 
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 checkAndSetTimeWithDatabaseManager(date);
             }
         };
-        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
+        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
     }
 
     private void unregisterBroadcastReceiver() {

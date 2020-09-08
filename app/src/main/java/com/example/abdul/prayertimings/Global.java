@@ -98,18 +98,17 @@ class Global {
         return simpleDateFormat.format(new DateTime(time));
     }
 
-    public static void scheduleNotifications(Context context) {
+    public static void scheduleNotificationsOfAllPrayerTimesForThisDay(Context context) {
         PrayerTimeService prayerTimeService = new PrayerTimeService(context);
-        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth();
+        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
 
         for (int index = 0; index < 7; index++) {
             try {
                 Date timeToSet = DateFormats.hour24.parse(time[index]);
                 Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
 
-                assert timeToSet != null;
-                if (timeToSet.after(currentSystemTime) /*|| timeToSet.equals(currentSystemTime)*/) {
-                    assert currentSystemTime != null;
+                assert timeToSet != null && currentSystemTime != null;
+                if (timeToSet.after(currentSystemTime)) {
                     long delay = timeToSet.getTime() - currentSystemTime.getTime();
                     makeNotificationPendingIntentWithRequestCode(context, index, delay);
                 }
@@ -120,30 +119,27 @@ class Global {
     }
 
     private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
-        Intent alertIntent = new Intent(context, NotificationPublisher.class);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long alertTime = Global.getCurrentTimeMillis() + delay;
 
-        alertIntent.putExtra("index", index);
-        alertIntent.putExtra("setWhen", alertTime);
+        Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
+        intentNotificationPublisher.putExtra("index", index);
+        intentNotificationPublisher.putExtra("setWhen", alertTime);
+        intentNotificationPublisher.putExtra("MSG", Global.NotificationMessage.get(index));
 
-        alertIntent.putExtra("MSG", Global.NotificationMessage.get(index));
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, alertIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         assert alarmManager != null;
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
     }
 
-    public static void cancelAllNotifications(Context context) {
+    public static void cancelAllScheduledNotificationsOfThisDay(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
+        assert alarmManager != null;
         for (int index = 0; index < 7; index++) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    index,
-                    new Intent(context, NotificationPublisher.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT
-            );
-            if (pendingIntent != null && alarmManager != null) {
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
+            if (pendingIntent != null) {
                 alarmManager.cancel(pendingIntent);
             }
         }
