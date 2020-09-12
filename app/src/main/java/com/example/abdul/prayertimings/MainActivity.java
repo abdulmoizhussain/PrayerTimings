@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         {
             DateTime date = new DateTime();
-            setDateAD(date);
-            setDateAH(date);
+            setDateAnnoDomini(date);
+            setDateAnnoHegirae(date);
             checkAndSetTimeWithDatabaseManager(date);
         }
         clearAllNotificationsFromShutter();
@@ -134,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 DateTime date = new DateTime();
-                setDateAD(date);
-                setDateAH(date);
+                setDateAnnoDomini(date);
+                setDateAnnoHegirae(date);
                 checkAndSetTimeWithDatabaseManager(date);
             }
         };
@@ -186,11 +186,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setDateAD(DateTime date) {
+    /**
+     * Sets date of Anno Domini (In the year of Jesus Christ) a.k.a AD.
+     * @param date DateTime/Date from which AD-date will be displayed.
+     */
+    private void setDateAnnoDomini(DateTime date) {
         textViewDateAD.setText(String.format("%s-%s-%s", date.formatDate(), date.formatMonth(), date.formatYear()));
     }
 
-    private void setDateAH(DateTime date) {
+    /**
+     * Sets date of Anno Hegirae (In the year of the Hijra). Anno (in the year) + Hegirae (of the Hijra).
+     * @param date DateTime/Date from which AH-date will be calculated and displayed.
+     */
+    private void setDateAnnoHegirae(DateTime date) {
         Chronology isoChronology = ISOChronology.getInstanceUTC();
         Chronology islamicChronology = IslamicChronology.getInstanceUTC();
         LocalDate localDateIso = new LocalDate(
