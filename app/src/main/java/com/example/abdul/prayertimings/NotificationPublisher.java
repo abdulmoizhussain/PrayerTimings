@@ -47,11 +47,10 @@ public class NotificationPublisher extends BroadcastReceiver {
 
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(notificationId, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "DefaultNotificationChannel");
+        final int smallIcon = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ? R.drawable.app_icon_transparent : R.drawable.app_icon;
 
-        builder.setSmallIcon(
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ? R.drawable.app_icon_transparent : R.drawable.app_icon
-        );
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AppStartup.AppNotificationChannels.PRAYER_TIME_NOTIFICATION);
+        builder.setSmallIcon(smallIcon);
 //        Bitmap bitmapAppIconLarge = BitmapFactory.decodeResource(context.getResources(), R.drawable.app_icon);
 //        builder.setLargeIcon(bitmapAppIconLarge);
 

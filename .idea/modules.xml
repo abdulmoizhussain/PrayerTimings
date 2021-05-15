@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PrayerTimings.iml" filepath="$PROJECT_DIR$/.idea/modules/PrayerTimings.iml" group="PrayerTimings" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="PrayerTimings/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PrayerTimings.iml" filepath="$PROJECT_DIR$/.idea/modules/PrayerTimings.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/PrayerTimings.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/PrayerTimings.app.iml" />
     </modules>
   </component>
 </project>
