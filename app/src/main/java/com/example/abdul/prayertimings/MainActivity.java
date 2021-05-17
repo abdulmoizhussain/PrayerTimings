@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearAllNotificationsFromShutter() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        assert notificationManager != null;
         for (int index = 0; index < 7; index++) {
             notificationManager.cancel(index);
         }
@@ -182,12 +181,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (ParseException e) {
+            NotificationManagement.notifyWithErrorDetails(this, e.toString());
             e.printStackTrace();
         }
     }
 
     /**
      * Sets date of Anno Domini (In the year of Jesus Christ) a.k.a AD.
+     *
      * @param date DateTime/Date from which AD-date will be displayed.
      */
     private void setDateAnnoDomini(DateTime date) {
@@ -196,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Sets date of Anno Hegirae (In the year of the Hijra). Anno (in the year) + Hegirae (of the Hijra).
+     *
      * @param date DateTime/Date from which AH-date will be calculated and displayed.
      */
     private void setDateAnnoHegirae(DateTime date) {

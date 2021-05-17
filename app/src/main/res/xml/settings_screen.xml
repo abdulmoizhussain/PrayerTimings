@@ -1,48 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<CheckBoxPreference
-		android:title="Notifications"
-		android:summary="Notifies at the start of every Prayer time."
-		android:key="notification_switch"
-		android:defaultValue="false"
-		>
-	</CheckBoxPreference>
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="notification_switch"
+        android:summary="Notifies at the start of every Prayer time."
+        android:title="Notifications" />
 
-	<CheckBoxPreference
-		android:title="Silence"
-		android:summary="Silents phone for Prayers."
-		android:key="silence_switch"
-		android:defaultValue="false"
-		>
-	</CheckBoxPreference>
-	
-	<ListPreference
-		android:title="Silence Duration"
-		android:key="silence_duration"
-		android:entries="@array/silenceDuration"
-		android:entryValues="@array/silenceDurationValues"
-		>
-	</ListPreference>
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="silence_switch"
+        android:summary="Silents phone for Prayers."
+        android:title="Silence" />
 
-	<PreferenceCategory
-		android:title="Silence Timings for Prayers"
-		android:key="silence_category">
+    <ListPreference
+        android:entries="@array/silenceDuration"
+        android:entryValues="@array/silenceDurationValues"
+        android:key="silence_duration"
+        android:title="Silence Duration" />
 
-		<Preference android:title="Fajr"
-					android:key="fajr"/>
+    <PreferenceCategory
+        android:key="silence_category"
+        android:title="Silence Timings for Prayers">
 
-		<Preference android:title="Zuhur"
-					android:key="zuhur"/>
+        <Preference
+            android:key="fajr"
+            android:title="Fajr" />
 
-		<Preference android:title="Asr"
-					android:key="asr"/>
+        <Preference
+            android:key="zuhur"
+            android:title="Zuhur" />
 
-		<Preference android:title="Maghrib"
-					android:key="maghrib"/>
+        <Preference
+            android:key="asr"
+            android:title="Asr" />
 
-		<Preference android:title="Isha"
-					android:key="isha"/>
-	</PreferenceCategory>
-	
+        <Preference
+            android:key="maghrib"
+            android:title="Maghrib" />
+
+        <Preference
+            android:key="isha"
+            android:title="Isha" />
+    </PreferenceCategory>
+
 </PreferenceScreen>
