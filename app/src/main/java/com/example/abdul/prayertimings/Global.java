@@ -98,26 +98,6 @@ class Global {
         return simpleDateFormat.format(new DateTime(time));
     }
 
-    public static void scheduleNotificationsOfAllPrayerTimesForThisDay(Context context) {
-        PrayerTimeService prayerTimeService = new PrayerTimeService(context);
-        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
-
-        for (int index = 0; index < 7; index++) {
-            try {
-                Date timeToSet = DateFormats.hour24.parse(time[index]);
-                Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
-
-                assert timeToSet != null && currentSystemTime != null;
-                if (timeToSet.after(currentSystemTime)) {
-                    long delay = timeToSet.getTime() - currentSystemTime.getTime();
-                    makeNotificationPendingIntentWithRequestCode(context, index, delay);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
         long alertTime = Global.getCurrentTimeMillis() + delay;
 
@@ -141,6 +121,26 @@ class Global {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
             if (pendingIntent != null) {
                 alarmManager.cancel(pendingIntent);
+            }
+        }
+    }
+
+    public static void scheduleNotificationsOfAllPrayerTimesForThisDay(Context context) {
+        PrayerTimeService prayerTimeService = new PrayerTimeService(context);
+        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
+
+        for (int index = 0; index < 7; index++) {
+            try {
+                Date timeToSet = DateFormats.hour24.parse(time[index]);
+                Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
+
+                assert timeToSet != null && currentSystemTime != null;
+                if (timeToSet.after(currentSystemTime)) {
+                    long delay = timeToSet.getTime() - currentSystemTime.getTime();
+                    makeNotificationPendingIntentWithRequestCode(context, index, delay);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
     }

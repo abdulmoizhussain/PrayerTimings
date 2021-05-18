@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean("firstTime", true);
             editor.apply();
         }
-        registerBroadcastReceiver();
+        registerActionTimeTickBroadcastReceiver();
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void registerBroadcastReceiver() {
+    private void registerActionTimeTickBroadcastReceiver() {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
