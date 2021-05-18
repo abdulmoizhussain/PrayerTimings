@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAndScheduleNotifications() {
+        Global.cancelAllScheduledNotificationsOfThisDay(this);
         if (Global.getNotificationFlag(this)) {
-            Global.cancelAllScheduledNotificationsOfThisDay(this);
             Global.scheduleNotificationsOfAllPrayerTimesForThisDay(this);
         }
     }
