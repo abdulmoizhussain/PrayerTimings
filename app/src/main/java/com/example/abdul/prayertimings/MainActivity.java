@@ -138,7 +138,9 @@ public class MainActivity extends AppCompatActivity {
                 checkAndSetTimeWithDatabaseManager(date);
             }
         };
-        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_TIME_TICK);
+        registerReceiver(broadcastReceiver, intentFilter);
     }
 
     private void unregisterBroadcastReceiver() {
