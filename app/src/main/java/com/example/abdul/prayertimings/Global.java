@@ -31,11 +31,11 @@ class Global {
     public static final Map<Integer, String> NotificationMessage;
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
     public static final Collection<String> IntentActions = Collections.unmodifiableList(Arrays.asList(
-            Intent.ACTION_DATE_CHANGED,
-            Intent.ACTION_BOOT_COMPLETED,
-            Intent.ACTION_TIME_CHANGED,
-            Intent.ACTION_TIMEZONE_CHANGED,
-            "android.intent.action.CUSTOM_BROADCAST"
+            AndroidIntent.ACTION_DATE_CHANGED_ALTERNATIVE,
+            AndroidIntent.ACTION_DATE_CHANGED,
+            AndroidIntent.ACTION_BOOT_COMPLETED,
+            AndroidIntent.ACTION_TIME_CHANGED,
+            AndroidIntent.ACTION_TIMEZONE_CHANGED
     ));
 
     static {
@@ -80,10 +80,11 @@ class Global {
 
     /**
      * Removes extra seconds which cause delay.
+     * or do it this way, source: https://stackoverflow.com/q/48648378
      *
      * @return current time in milliseconds.
      */
-    public static long getCurrentTimeMillis() {
+    public static long getCurrentTimeMillisTruncated() {
         long remainder, currentTimeMillis;
         remainder = currentTimeMillis = System.currentTimeMillis();
         remainder %= 60000;
@@ -101,7 +102,7 @@ class Global {
     }
 
     private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
-        long alertTime = Global.getCurrentTimeMillis() + delay;
+        long alertTime = Global.getCurrentTimeMillisTruncated() + delay;
 
         Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
         intentNotificationPublisher.putExtra("index", index);
@@ -166,7 +167,7 @@ class Global {
         }
 
         Intent intent = new Intent(context, ReScheduleNotificationsBroadcastReceiver.class);
-        intent.setAction("android.intent.action.CUSTOM_BROADCAST");
+        intent.setAction(AndroidIntent.ACTION_DATE_CHANGED_ALTERNATIVE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -197,7 +198,7 @@ class Global {
                 assert currentTime != null;
                 if (currentTime.before(silenceTime)) {
                     assert silenceTime != null;
-                    long silencerTime = Global.getCurrentTimeMillis() + silenceTime.getTime() - currentTime.getTime();
+                    long silencerTime = Global.getCurrentTimeMillisTruncated() + silenceTime.getTime() - currentTime.getTime();
 
                     Intent intent1 = new Intent(context, TurnToSilentModeBroadcastReceiver.class);
                     intent1.putExtra("switchCase", "toSilent");

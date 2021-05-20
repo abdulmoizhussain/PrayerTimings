@@ -28,7 +28,7 @@ public class TurnToSilentModeBroadcastReceiver extends BroadcastReceiver {
                     audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
 
                     long silenceDuration = sharedPreferences.getInt("silence_duration", 10);
-                    long backToGeneralTime = Global.getCurrentTimeMillis() + (60 * 1000 * silenceDuration);
+                    long backToGeneralTime = Global.getCurrentTimeMillisTruncated() + (60 * 1000 * silenceDuration);
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 99, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
