@@ -13,6 +13,7 @@ import com.example.abdul.prayertimings.services.PrayerTimeService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -33,7 +34,8 @@ class Global {
             Intent.ACTION_DATE_CHANGED,
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_TIME_CHANGED,
-            Intent.ACTION_TIMEZONE_CHANGED
+            Intent.ACTION_TIMEZONE_CHANGED,
+            "android.intent.action.CUSTOM_BROADCAST"
     ));
 
     static {
@@ -106,43 +108,74 @@ class Global {
         intentNotificationPublisher.putExtra("setWhen", alertTime);
         intentNotificationPublisher.putExtra("MSG", Global.NotificationMessage.get(index));
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        assert alarmManager != null;
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
     }
 
     public static void cancelAllScheduledNotificationsOfThisDay(Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
-        assert alarmManager != null;
-        for (int index = 0; index < 7; index++) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
-            if (pendingIntent != null) {
-                alarmManager.cancel(pendingIntent);
+        {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
+            for (int index = 0; index < 7; index++) {
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, 0);
+                if (pendingIntent != null) {
+                    alarmManager.cancel(pendingIntent);
+                }
             }
         }
+
+        Intent intent = new Intent(context, ReScheduleNotificationsBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
     }
 
     public static void scheduleNotificationsOfAllPrayerTimesForThisDay(Context context) {
-        PrayerTimeService prayerTimeService = new PrayerTimeService(context);
-        String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
+        {
+            PrayerTimeService prayerTimeService = new PrayerTimeService(context);
+            String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
 
-        for (int index = 0; index < 7; index++) {
-            try {
-                Date timeToSet = DateFormats.hour24.parse(time[index]);
-                Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
+            for (int index = 0; index < 7; index++) {
+                try {
+                    Date timeToSet = DateFormats.hour24.parse(time[index]);
+                    Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
 
-                assert timeToSet != null && currentSystemTime != null;
-                if (timeToSet.after(currentSystemTime)) {
-                    long delay = timeToSet.getTime() - currentSystemTime.getTime();
-                    makeNotificationPendingIntentWithRequestCode(context, index, delay);
+                    assert timeToSet != null && currentSystemTime != null;
+                    if (timeToSet.after(currentSystemTime)) {
+                        long delay = timeToSet.getTime() - currentSystemTime.getTime();
+                        makeNotificationPendingIntentWithRequestCode(context, index, delay);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-            } catch (ParseException e) {
-                e.printStackTrace();
             }
         }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        long longMillis = calendar.getTimeInMillis();
+
+        if (longMillis < 50000) {
+            longMillis = 50000;
+        }
+
+        Intent intent = new Intent(context, ReScheduleNotificationsBroadcastReceiver.class);
+        intent.setAction("android.intent.action.CUSTOM_BROADCAST");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                longMillis,
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent
+        );
     }
 
     public static String formatThisTimeIn24(Long time) {
@@ -165,14 +198,14 @@ class Global {
                 if (currentTime.before(silenceTime)) {
                     assert silenceTime != null;
                     long silencerTime = Global.getCurrentTimeMillis() + silenceTime.getTime() - currentTime.getTime();
+
                     Intent intent1 = new Intent(context, TurnToSilentModeBroadcastReceiver.class);
                     intent1.putExtra("switchCase", "toSilent");
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, i, intent1,
                             PendingIntent.FLAG_CANCEL_CURRENT);
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    assert alarmManager != null;
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();

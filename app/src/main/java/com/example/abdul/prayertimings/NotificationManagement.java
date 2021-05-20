@@ -60,7 +60,7 @@ public class NotificationManagement {
 
         int countAsId = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt("error_notification_count", 0);
+                .getInt("error_notification_count", 2000);
 
         notificationManager.cancel(countAsId);
         notificationManager.notify(countAsId, notification);
