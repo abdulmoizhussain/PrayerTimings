@@ -31,6 +31,7 @@ public class NotificationManagement {
         Notification notification = builder
                 .setContentTitle(context.getResources().getString(R.string.app_name))
                 .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(contentText))
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
@@ -52,6 +53,7 @@ public class NotificationManagement {
                 .setContentTitle("Error!")
                 .setContentText(details)
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
 //                .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
                 .build();
