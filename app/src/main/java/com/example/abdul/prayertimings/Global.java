@@ -109,7 +109,7 @@ class Global {
         intentNotificationPublisher.putExtra("setWhen", alertTime);
         intentNotificationPublisher.putExtra("MSG", Global.NotificationMessage.get(index));
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
@@ -120,7 +120,7 @@ class Global {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
             for (int index = 0; index < 7; index++) {
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, 0);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (pendingIntent != null) {
                     alarmManager.cancel(pendingIntent);
                 }
