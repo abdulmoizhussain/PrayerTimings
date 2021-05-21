@@ -18,7 +18,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         long setWhen = intent.getLongExtra("setWhen", 0);
         String contentText = intent.getStringExtra("MSG");
 
-        String delay = "delay:" + (System.currentTimeMillis() + setWhen);
+        String delay = "delay:" + (System.currentTimeMillis() - setWhen);
         NotificationManagement.notifyWithErrorDetails(context, delay);
         NotificationManagement.notifyWithErrorDetails(
                 context,
