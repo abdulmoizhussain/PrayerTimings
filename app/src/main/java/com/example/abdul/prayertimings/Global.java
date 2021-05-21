@@ -31,11 +31,10 @@ class Global {
     public static final Map<Integer, String> NotificationMessage;
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
     public static final Collection<String> IntentActions = Collections.unmodifiableList(Arrays.asList(
-            AndroidIntent.ACTION_DATE_CHANGED_ALTERNATIVE,
-            AndroidIntent.ACTION_DATE_CHANGED,
-            AndroidIntent.ACTION_BOOT_COMPLETED,
-            AndroidIntent.ACTION_TIME_CHANGED,
-            AndroidIntent.ACTION_TIMEZONE_CHANGED
+            Intent.ACTION_DATE_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED
     ));
 
     static {
@@ -167,7 +166,7 @@ class Global {
         }
 
         Intent intent = new Intent(context, ReScheduleNotificationsBroadcastReceiver.class);
-        intent.setAction(AndroidIntent.ACTION_DATE_CHANGED_ALTERNATIVE);
+        intent.setAction(Intent.ACTION_DATE_CHANGED);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
