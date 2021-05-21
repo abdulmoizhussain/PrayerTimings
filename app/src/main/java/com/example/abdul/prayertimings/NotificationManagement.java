@@ -47,16 +47,17 @@ public class NotificationManagement {
 
     public static void notifyWithErrorDetails(Context context, String details) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AppStartup.AppNotificationChannels.PRAYER_TIME_NOTIFICATION);
-        builder.setSmallIcon(smallIcon);
 
-        Notification notification = builder
+        builder
                 .setContentTitle("Error!")
                 .setContentText(details)
+                .setSmallIcon(smallIcon)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
 //                .setContentIntent(pendingIntent)
-                .setAutoCancel(false)
-                .build();
+                .setAutoCancel(false);
+
+        Notification notification = builder.build();
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
