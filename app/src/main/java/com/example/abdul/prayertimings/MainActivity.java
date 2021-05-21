@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             setDateAnnoHegirae(date);
             checkAndSetTimeWithDatabaseManager(date);
         }
-        clearAllNotificationsFromShutter();
+//        clearAllNotificationsFromShutter();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean("firstTime", false)) {
             //----\  /---
