@@ -8,7 +8,7 @@ import com.example.abdul.prayertimings.DateTime;
 import java.util.Calendar;
 
 public class PrayerTimeService {
-    private Context context;
+    private final Context context;
 
     public PrayerTimeService(Context context) {
         this.context = context;

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class DatabaseManager {
-    private AtomicInteger atomicInteger = new AtomicInteger();
+    private final AtomicInteger atomicInteger = new AtomicInteger();
     private static DatabaseManager databaseManager;
     private static SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase sqLiteDatabase;
