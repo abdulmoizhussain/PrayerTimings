@@ -3,9 +3,6 @@ package com.example.abdul.prayertimings.services;
 import android.content.Context;
 
 import com.example.abdul.prayertimings.DatabaseManager;
-import com.example.abdul.prayertimings.DateTime;
-
-import java.util.Calendar;
 
 public class PrayerTimeService {
     private final Context context;
@@ -14,7 +11,7 @@ public class PrayerTimeService {
         this.context = context;
     }
 
-    public String[] getPrayerTimeOfThisDayAndMonth(DateTime dateTime) {
+    public String[] getPrayerTimeByMonthAndDate(final int month, final int dayOfMonth) {
         DatabaseManager databaseManager = DatabaseManager.getInstance(context);
         databaseManager.openDatabase();
         if (databaseManager.databaseIsEmpty()) {
@@ -23,13 +20,7 @@ public class PrayerTimeService {
             }
         }
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateTime);
-
-        String[] prayerTimesOfThisDay = databaseManager.fetchPrayerTimeOfADayOfKarachi(
-                calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
+        String[] prayerTimesOfThisDay = databaseManager.fetchPrayerTimeOfADayOfKarachi(month, dayOfMonth);
         databaseManager.closeDatabase();
 
         return prayerTimesOfThisDay;

@@ -25,6 +25,7 @@ import org.joda.time.chrono.ISOChronology;
 import org.joda.time.chrono.IslamicChronology;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
@@ -118,7 +119,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkAndSetTimeWithDatabaseManager(DateTime dateTime) {
         PrayerTimeService prayerTimeService = new PrayerTimeService(this);
-        renderPrayerTimings(prayerTimeService.getPrayerTimeOfThisDayAndMonth(dateTime));
+        Calendar calendar = CalendarHelper.toCalendar(dateTime);
+        renderPrayerTimings(
+                prayerTimeService.getPrayerTimeByMonthAndDate(
+                        calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                )
+        );
     }
 
     private void checkAndScheduleNotifications() {

@@ -100,18 +100,16 @@ class Global {
         return simpleDateFormat.format(new DateTime(time));
     }
 
-    private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long delay) {
-        long alertTime = Global.getCurrentTimeMillisTruncated() + delay;
-
+    private static void makeNotificationPendingIntentWithRequestCode(Context context, int index, long triggerAtMillis) {
         Intent intentNotificationPublisher = new Intent(context, NotificationPublisher.class);
         intentNotificationPublisher.putExtra("index", index);
-        intentNotificationPublisher.putExtra("setWhen", alertTime);
+        intentNotificationPublisher.putExtra("setWhen", triggerAtMillis);
         intentNotificationPublisher.putExtra("MSG", Global.NotificationMessage.get(index));
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     public static void cancelAllScheduledNotificationsOfThisDay(Context context) {
@@ -134,20 +132,33 @@ class Global {
 
     public static void scheduleNotificationsOfAllPrayerTimesForThisDay(Context context) {
         {
+            Calendar calendarNow = Calendar.getInstance();
+            Calendar calendarToSet = (Calendar) calendarNow.clone();
+
+            // right at the start of the minute like: 14:30:00.00
+            calendarToSet.set(Calendar.SECOND, 0);
+            calendarToSet.set(Calendar.MILLISECOND, 0);
+
             PrayerTimeService prayerTimeService = new PrayerTimeService(context);
-            String[] time = prayerTimeService.getPrayerTimeOfThisDayAndMonth(new DateTime());
+            String[] time = prayerTimeService.getPrayerTimeByMonthAndDate(
+                    calendarNow.get(Calendar.MONTH) + 1,
+                    calendarNow.get(Calendar.DAY_OF_MONTH)
+            );
 
             for (int index = 0; index < 7; index++) {
                 try {
-                    Date timeToSet = DateFormats.hour24.parse(time[index]);
-                    Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
+                    {
+                        Calendar calendarThisPrayerTime = CalendarHelper.toCalendar(DateFormats.hour24.parse(time[index]));
 
-                    assert timeToSet != null && currentSystemTime != null;
-                    if (timeToSet.after(currentSystemTime)) {
-                        long delay = timeToSet.getTime() - currentSystemTime.getTime();
-                        makeNotificationPendingIntentWithRequestCode(context, index, delay);
+                        calendarToSet.set(Calendar.HOUR_OF_DAY, calendarThisPrayerTime.get(Calendar.HOUR_OF_DAY));
+                        calendarToSet.set(Calendar.MINUTE, calendarThisPrayerTime.get(Calendar.MINUTE));
+                    }
+
+                    if (calendarNow.before(calendarToSet)) {
+                        makeNotificationPendingIntentWithRequestCode(context, index, calendarToSet.getTimeInMillis());
                     }
                 } catch (ParseException e) {
+                    NotificationManagement.notifyWithErrorDetails(context, e.toString());
                     e.printStackTrace();
                 }
             }
