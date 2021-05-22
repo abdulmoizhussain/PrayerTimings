@@ -24,40 +24,39 @@ public class NotificationManagement {
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(notificationId, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AppStartup.AppNotificationChannels.PRAYER_TIME_NOTIFICATION);
-        builder.setSmallIcon(smallIcon);
 //        Bitmap bitmapAppIconLarge = BitmapFactory.decodeResource(context.getResources(), R.drawable.app_icon);
 //        builder.setLargeIcon(bitmapAppIconLarge);
 
-        Notification notification = builder
-                .setContentTitle(context.getResources().getString(R.string.app_name))
-                .setContentText(contentText)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(contentText))
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setWhen(setWhen)
-                .setShowWhen(true)
-                .build();
+        builder.setContentTitle(context.getResources().getString(R.string.app_name));
+        builder.setContentText(contentText);
+        builder.setSmallIcon(smallIcon);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(contentText));
+        builder.setDefaults(Notification.DEFAULT_ALL);
+        builder.setContentIntent(pendingIntent);
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setAutoCancel(true);
+        builder.setWhen(setWhen);
+        builder.setShowWhen(true);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.cancel(notificationId);
-        notificationManager.notify(notificationId, notification);
+        notificationManager.notify(notificationId, builder.build());
     }
 
     public static void notifyWithErrorDetails(Context context, String details) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, AppStartup.AppNotificationChannels.PRAYER_TIME_NOTIFICATION);
 
-        builder
-                .setContentTitle("Error!")
-                .setContentText(details)
-                .setSmallIcon(smallIcon)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
-//                .setContentIntent(pendingIntent)
-                .setAutoCancel(false);
-
-        Notification notification = builder.build();
+        builder.setContentTitle("Error!");
+        builder.setContentText(details);
+        builder.setSmallIcon(smallIcon);
+        builder.setDefaults(Notification.DEFAULT_ALL);
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(details));
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+//        builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(false);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -66,7 +65,7 @@ public class NotificationManagement {
                 .getInt("error_notification_count", 2000);
 
         notificationManager.cancel(countAsId);
-        notificationManager.notify(countAsId, notification);
+        notificationManager.notify(countAsId, builder.build());
 
         SharedPreferences.Editor sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
         sharedPreferences.putInt("error_notification_count", ++countAsId);

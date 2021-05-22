@@ -1,6 +1,7 @@
 package com.example.abdul.prayertimings;
 
 import android.app.Application;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
@@ -28,6 +29,7 @@ public class AppStartup extends Application {
                     NotificationManager.IMPORTANCE_HIGH
             );
             channel.setDescription("These will notify you about every Prayer timings.");
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
