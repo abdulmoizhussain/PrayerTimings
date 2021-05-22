@@ -41,7 +41,6 @@ public class NotificationManagement {
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.cancel(notificationId);
         notificationManager.notify(notificationId, builder.build());
     }
 
@@ -64,7 +63,6 @@ public class NotificationManagement {
                 .getDefaultSharedPreferences(context)
                 .getInt("error_notification_count", 2000);
 
-        notificationManager.cancel(countAsId);
         notificationManager.notify(countAsId, builder.build());
 
         SharedPreferences.Editor sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
