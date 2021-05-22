@@ -7,7 +7,6 @@ import android.content.Intent;
 public class ReScheduleNotificationsBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        NotificationManagement.notifyWithErrorDetails(context, intent.getAction());
         if (Global.IntentActions.contains(intent.getAction())) {
             Global.cancelAllScheduledNotificationsOfThisDay(context);
             if (Global.getNotificationFlag(context)) {
