@@ -165,15 +165,16 @@ class Global {
         }
 
         Calendar calendar = Calendar.getInstance();
+        // the next day (tomorrow)
         calendar.add(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        // at 01:00 AM
+        calendar.set(Calendar.HOUR_OF_DAY, 1);
         calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
 
-        long longMillis = calendar.getTimeInMillis();
+        long triggerAtMillis = calendar.getTimeInMillis();
 
-        if (longMillis < 50000) {
-            longMillis = 50000;
+        if (triggerAtMillis < 50000) {
+            triggerAtMillis = 50000;
         }
 
         Intent intent = new Intent(context, ReScheduleNotificationsBroadcastReceiver.class);
@@ -181,10 +182,9 @@ class Global {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setInexactRepeating(
+        alarmManager.set(
                 AlarmManager.RTC_WAKEUP,
-                longMillis,
-                AlarmManager.INTERVAL_DAY,
+                triggerAtMillis,
                 pendingIntent
         );
     }
