@@ -109,7 +109,7 @@ class Global {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     public static void cancelAllScheduledNotificationsOfThisDay(Context context) {
@@ -182,11 +182,7 @@ class Global {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-        );
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     public static String formatThisTimeIn24(Long time) {
@@ -197,13 +193,13 @@ class Global {
 
     public static void setToSilentMode(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("silence_timings", 0);
-        for (int i = 11; i < 16; i++) {
+        for (int index = 11; index < 16; index++) {
             try {
-                if (prefs.getLong(Integer.toString(i), 0) == 0) {
+                if (prefs.getLong(Integer.toString(index), 0) == 0) {
                     continue;
                 }
                 Date currentTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
-                Date silenceTime = DateFormats.hour24.parse(Global.formatThisTimeIn24(prefs.getLong(Integer.toString(i), 0)));
+                Date silenceTime = DateFormats.hour24.parse(Global.formatThisTimeIn24(prefs.getLong(Integer.toString(index), 0)));
 
                 assert currentTime != null;
                 if (currentTime.before(silenceTime)) {
@@ -213,10 +209,9 @@ class Global {
                     Intent intent1 = new Intent(context, TurnToSilentModeBroadcastReceiver.class);
                     intent1.putExtra("switchCase", "toSilent");
 
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, i, intent1,
-                            PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
