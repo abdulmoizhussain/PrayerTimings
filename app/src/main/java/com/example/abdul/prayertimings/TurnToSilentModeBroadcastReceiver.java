@@ -35,7 +35,7 @@ public class TurnToSilentModeBroadcastReceiver extends BroadcastReceiver {
 
                     assert alarmManager != null;
 
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, backToGeneralTime, pendingIntent);
+                    MyAlarmManager.set(alarmManager, AlarmManager.RTC_WAKEUP, backToGeneralTime, pendingIntent);
                     break;
 
                 case "toGeneral":

@@ -109,7 +109,7 @@ class Global {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intentNotificationPublisher, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        MyAlarmManager.set(alarmManager, AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     public static void cancelAllScheduledNotificationsOfThisDay(Context context) {
@@ -182,7 +182,7 @@ class Global {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -50, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        MyAlarmManager.set(alarmManager, AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
     }
 
     public static String formatThisTimeIn24(Long time) {
@@ -211,7 +211,7 @@ class Global {
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, index, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
                     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
+                    MyAlarmManager.set(alarmManager, AlarmManager.RTC_WAKEUP, silencerTime, pendingIntent);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -219,5 +219,3 @@ class Global {
         }
     }
 }
-
-
