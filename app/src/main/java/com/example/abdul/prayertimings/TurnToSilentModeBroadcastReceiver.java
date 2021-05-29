@@ -31,11 +31,8 @@ public class TurnToSilentModeBroadcastReceiver extends BroadcastReceiver {
                     long backToGeneralTime = Global.getCurrentTimeMillisTruncated() + (60 * 1000 * silenceDuration);
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 99, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
-                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-                    assert alarmManager != null;
-
-                    MyAlarmManager.set(alarmManager, AlarmManager.RTC_WAKEUP, backToGeneralTime, pendingIntent);
+                    MyAlarmManager.set(context, AlarmManager.RTC_WAKEUP, backToGeneralTime, pendingIntent);
                     break;
 
                 case "toGeneral":
