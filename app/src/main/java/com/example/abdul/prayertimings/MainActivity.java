@@ -1,6 +1,5 @@
 package com.example.abdul.prayertimings;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.Menu;
@@ -25,20 +25,35 @@ import org.joda.time.chrono.ISOChronology;
 import org.joda.time.chrono.IslamicChronology;
 
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView textViewDateAD, textViewDateAH;
+    private TextView textViewDateAD, textViewDateAH, textViewRemainingTime;
     private BroadcastReceiver broadcastReceiver;
     private ColorStateList defaultColorStateList;
     private static final int colorCodeGreen = Color.parseColor("#008000");
+    private final Handler handler = new Handler();
+    private Runnable runnable;
+    private final int delay = 1000;
+    private PrayerTimeService prayerTimeService;
+    private final TextView[] prayerTimeTextViews = new TextView[7];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        prayerTimeTextViews[0] = findViewById(R.id.textViewFajarTime);
+        prayerTimeTextViews[1] = findViewById(R.id.textViewFajarEndsTime);
+        prayerTimeTextViews[2] = findViewById(R.id.textViewZawalStartingTime);
+        prayerTimeTextViews[3] = findViewById(R.id.textViewZuhurTime);
+        prayerTimeTextViews[4] = findViewById(R.id.textViewAsrTime);
+        prayerTimeTextViews[5] = findViewById(R.id.textViewMaghribTime);
+        prayerTimeTextViews[6] = findViewById(R.id.textViewIshaTime);
+        textViewRemainingTime = findViewById(R.id.textViewRemainingTime);
+
+        prayerTimeService = new PrayerTimeService(this);
         PreferenceManager.setDefaultValues(this, R.xml.settings_screen, true);
 
         textViewDateAD = findViewById(R.id.textViewAdValue);
@@ -61,14 +76,121 @@ public class MainActivity extends AppCompatActivity {
 */
     }
 
+    static class DataClass {
+        private DateTime lastDate;
+        private DateTime[] prayerTimesCurrentDay, prayerTimesNextDay;
+
+        public DateTime getLastDate() {
+            return lastDate;
+        }
+
+        public void setLastDate(DateTime lastDate) {
+            this.lastDate = lastDate;
+        }
+
+        public DateTime[] getPrayerTimesCurrentDay() {
+            return prayerTimesCurrentDay;
+        }
+
+        public void setPrayerTimesCurrentDay(DateTime[] prayerTimesCurrentDay) {
+            this.prayerTimesCurrentDay = prayerTimesCurrentDay;
+        }
+
+        public DateTime[] getPrayerTimesNextDay() {
+            return prayerTimesNextDay;
+        }
+
+        public void setPrayerTimesNextDay(DateTime[] prayerTimesNextDay) {
+            this.prayerTimesNextDay = prayerTimesNextDay;
+        }
+    }
+
+    private void runnableListener(DataClass dataClass) {
+        DateTime dateTimeNow = new DateTime();
+        long dateTimeNowMillis = dateTimeNow.getTime();
+
+        if (dataClass.getLastDate().getMinuteOfHour() != dateTimeNow.getMinuteOfHour()) {
+            // it is change of minute
+            // now update the values from DB.
+
+            dataClass.setLastDate(new DateTime(dateTimeNowMillis));
+            try {
+                dataClass.setPrayerTimesCurrentDay(prayerTimeService.getPrayerTimes(dateTimeNow));
+                dataClass.setPrayerTimesNextDay(prayerTimeService.getPrayerTimes(dateTimeNow.addDays(1)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // TODO there is a bug in here
+
+        DateTime[] prayerTimesOfThisDay = dataClass.getPrayerTimesCurrentDay();
+
+        int indexOfCurrentPrayerTime = PrayerTimeService.findIndexOfCurrentPrayerTime(prayerTimesOfThisDay, dateTimeNow);
+
+        long timeMillisNextPrayer;
+
+        Console.log(Integer.toString(indexOfCurrentPrayerTime));
+        Console.log(Integer.toString(prayerTimesOfThisDay.length));
+
+        if (indexOfCurrentPrayerTime == (prayerTimesOfThisDay.length - 1)) {
+            // when it is the last index it means it is Esha-prayer time,
+            // now we have to take Fajr-prayer-time of the next day.
+            DateTime[] prayerTimesOfNextDay = dataClass.getPrayerTimesNextDay();
+
+            // getting Fajr-prayer time of next day.
+            timeMillisNextPrayer = prayerTimesOfNextDay[0].getTime();
+        } else {
+            timeMillisNextPrayer = prayerTimesOfThisDay[indexOfCurrentPrayerTime + 1].getTime();
+        }
+
+        Console.log("--------");
+        Console.log(new Date(timeMillisNextPrayer).toString());
+        Console.log(new Date(dateTimeNowMillis).toString());
+
+        DateTime difference = new DateTime(timeMillisNextPrayer - dateTimeNowMillis);
+
+        // source: https://stackoverflow.com/a/13904621
+        // source: https://stackoverflow.com/a/2003612
+        long totalHours = difference.totalHours();
+        long totalMinutesAfterHours = difference.totalMinutes() - (totalHours * 60);
+        long totalSeconds = difference.totalSeconds() % 60L;
+
+        // source to add leading zeros: https://javarevisited.blogspot.com/2013/02/add-leading-zeros-to-integers-Java-String-left-padding-example-program.html
+        textViewRemainingTime.setText(
+                String.format(Locale.US, "Next time-change in: %02d:%02d:%02d", totalHours, totalMinutesAfterHours, totalSeconds)
+        );
+    }
+
     @Override
     protected void onResume() {
-        super.onResume();
+        final DataClass dataClass = new DataClass();
+        DateTime dateTimeNow = new DateTime();
+
+        dataClass.setLastDate(dateTimeNow);
+        try {
+            dataClass.setPrayerTimesCurrentDay(prayerTimeService.getPrayerTimes(dataClass.getLastDate()));
+            dataClass.setPrayerTimesNextDay(prayerTimeService.getPrayerTimes(dataClass.getLastDate().addDays(1)));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        runnableListener(dataClass);
+
+        // source: https://stackoverflow.com/a/40058010
+        handler.postDelayed(runnable = new Runnable() {
+            public void run() {
+                // do something
+                runnableListener(dataClass);
+
+                handler.postDelayed(runnable, delay);
+            }
+        }, delay);
+
         {
-            DateTime date = new DateTime();
-            setDateAnnoDomini(date);
-            setDateAnnoHegirae(date);
-            checkAndSetTimeWithDatabaseManager(date);
+            setDateAnnoDomini(dateTimeNow);
+            setDateAnnoHegirae(dateTimeNow);
+            checkAndSetTimeWithDatabaseManager(dateTimeNow);
         }
 //        clearAllNotificationsFromShutter();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -82,11 +204,14 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
         registerActionTimeTickBroadcastReceiver();
+
+        super.onResume();
     }
 
     @Override
     protected void onPause() {
         unregisterBroadcastReceiver();
+        handler.removeCallbacks(runnable); //stop handler when activity not visible
         super.onPause();
     }
 
@@ -110,20 +235,18 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void clearAllNotificationsFromShutter() {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        for (int index = 0; index < 7; index++) {
-            notificationManager.cancel(index);
-        }
-    }
+//    private void clearAllNotificationsFromShutter() {
+//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        for (int index = 0; index < 7; index++) {
+//            notificationManager.cancel(index);
+//        }
+//    }
 
     private void checkAndSetTimeWithDatabaseManager(DateTime dateTime) {
-        PrayerTimeService prayerTimeService = new PrayerTimeService(this);
-        Calendar calendar = CalendarHelper.toCalendar(dateTime);
         renderPrayerTimings(
-                prayerTimeService.getPrayerTimeByMonthAndDate(
-                        calendar.get(Calendar.MONTH) + 1,
-                        calendar.get(Calendar.DAY_OF_MONTH)
+                prayerTimeService.getPrayerTimes(
+                        dateTime.getMonthOfYear(),
+                        dateTime.getDayOfMonth()
                 )
         );
     }
@@ -157,15 +280,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void renderPrayerTimings(String[] time) {
-        TextView[] view = new TextView[7];
-        view[0] = findViewById(R.id.textViewFajarTime);
-        view[1] = findViewById(R.id.textViewFajarEndsTime);
-        view[2] = findViewById(R.id.textViewZawalStartingTime);
-        view[3] = findViewById(R.id.textViewZuhurTime);
-        view[4] = findViewById(R.id.textViewAsrTime);
-        view[5] = findViewById(R.id.textViewMaghribTime);
-        view[6] = findViewById(R.id.textViewIshaTime);
-
         final boolean is24HourFormat = DateFormat.is24HourFormat(this);
         try {
             Date currentSystemTime = DateFormats.hour24.parse(new DateTime().formatIn24Hour());
@@ -176,16 +290,16 @@ public class MainActivity extends AppCompatActivity {
                 assert timeToSet != null;
                 {
                     String timeString = is24HourFormat ? DateFormats.hour24.format(timeToSet) : DateFormats.hour12.format(timeToSet);
-                    view[index].setText(timeString);
+                    prayerTimeTextViews[index].setText(timeString);
                 }
 
-                view[index].setTextColor(defaultColorStateList);
+                prayerTimeTextViews[index].setTextColor(defaultColorStateList);
                 if (currentSystemTime.after(timeToSet) || currentSystemTime.equals(timeToSet) || currentSystemTime.before(DateFormats.hour24.parse(time[0]))) {
-                    view[index].setTextColor(colorCodeGreen);
+                    prayerTimeTextViews[index].setTextColor(colorCodeGreen);
                     if ((index - 1) > -1) {
-                        view[index - 1].setTextColor(defaultColorStateList);
+                        prayerTimeTextViews[index - 1].setTextColor(defaultColorStateList);
                     } else {
-                        view[6].setTextColor(defaultColorStateList);
+                        prayerTimeTextViews[6].setTextColor(defaultColorStateList);
                     }
                 }
             }

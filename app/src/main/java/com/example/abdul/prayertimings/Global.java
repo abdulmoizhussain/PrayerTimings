@@ -26,7 +26,7 @@ import java.util.TimeZone;
  * This is an extra line to remove warning.
  */
 
-class Global {
+public class Global {
     public static final Map<Integer, String> IslamicMonthFullName;
     public static final Map<Integer, String> NotificationMessage;
     public static final TimeZone timeZoneGmt = TimeZone.getTimeZone("GMT");
@@ -76,19 +76,21 @@ class Global {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("notification_switch", false);
     }
 
+    public static long getCurrentTimeMillisTruncated() {
+        return truncateSecondsAndMilliseconds(System.currentTimeMillis());
+    }
 
     /**
      * Removes extra seconds which cause delay.
-     * or do it this way, source: https://stackoverflow.com/q/48648378
+     * or do it this way, source:
+     * https://stackoverflow.com/q/48648378
+     * https://stackoverflow.com/a/16473059
      *
      * @return current time in milliseconds.
      */
-    public static long getCurrentTimeMillisTruncated() {
-        long remainder, currentTimeMillis;
-        remainder = currentTimeMillis = System.currentTimeMillis();
-        remainder %= 60000;
-        currentTimeMillis -= remainder;
-        return currentTimeMillis;
+    public static long truncateSecondsAndMilliseconds(long timeInMillis) {
+        // 60000 OR 60 * 1000
+        return timeInMillis - (timeInMillis % 60000);
     }
 
     public static String formatThisTime(Context context, Long time) {
@@ -139,7 +141,7 @@ class Global {
             calendarToSet.set(Calendar.MILLISECOND, 0);
 
             PrayerTimeService prayerTimeService = new PrayerTimeService(context);
-            String[] time = prayerTimeService.getPrayerTimeByMonthAndDate(
+            String[] time = prayerTimeService.getPrayerTimes(
                     calendarNow.get(Calendar.MONTH) + 1,
                     calendarNow.get(Calendar.DAY_OF_MONTH)
             );
