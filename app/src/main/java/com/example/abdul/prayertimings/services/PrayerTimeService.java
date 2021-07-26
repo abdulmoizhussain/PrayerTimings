@@ -2,7 +2,6 @@ package com.example.abdul.prayertimings.services;
 
 import android.content.Context;
 
-import com.example.abdul.prayertimings.Console;
 import com.example.abdul.prayertimings.DatabaseManager;
 import com.example.abdul.prayertimings.DateFormats;
 import com.example.abdul.prayertimings.DateTime;
@@ -76,7 +75,7 @@ public class PrayerTimeService {
         // finding index of current-prayer-time
         final int lastIndex = prayerTimes.length - 1;
         for (int index = 0; index < prayerTimes.length; index++) {
-            if (index == lastIndex && (dateTimeNow.after(prayerTimes[index]) || dateTimeNow.equals(prayerTimes[index]))) {
+            if (index == lastIndex) {
                 return index;
             } else if ((dateTimeNow.after(prayerTimes[index]) || dateTimeNow.equals(prayerTimes[index])) && dateTimeNow.before(prayerTimes[index + 1])) {
                 return index;

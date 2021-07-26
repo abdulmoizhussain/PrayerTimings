@@ -122,31 +122,28 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // TODO there is a bug in here
-
         DateTime[] prayerTimesOfThisDay = dataClass.getPrayerTimesCurrentDay();
 
         int indexOfCurrentPrayerTime = PrayerTimeService.findIndexOfCurrentPrayerTime(prayerTimesOfThisDay, dateTimeNow);
 
         long timeMillisNextPrayer;
+        {
+            DateTime fajrPrayerTimeOfThisDay = prayerTimesOfThisDay[0];
+            int lastIndex = prayerTimesOfThisDay.length - 1;
 
-        Console.log(Integer.toString(indexOfCurrentPrayerTime));
-        Console.log(Integer.toString(prayerTimesOfThisDay.length));
+            if (indexOfCurrentPrayerTime == lastIndex && dateTimeNow.getHourOfDay() <= fajrPrayerTimeOfThisDay.getHourOfDay()) {
+                timeMillisNextPrayer = fajrPrayerTimeOfThisDay.getTime();
+            } else if (indexOfCurrentPrayerTime == lastIndex) {
+                // when it is the last index it means it is Esha-prayer time,
+                // now we have to take Fajr-prayer-time of the next day.
+                DateTime[] prayerTimesOfNextDay = dataClass.getPrayerTimesNextDay();
 
-        if (indexOfCurrentPrayerTime == (prayerTimesOfThisDay.length - 1)) {
-            // when it is the last index it means it is Esha-prayer time,
-            // now we have to take Fajr-prayer-time of the next day.
-            DateTime[] prayerTimesOfNextDay = dataClass.getPrayerTimesNextDay();
-
-            // getting Fajr-prayer time of next day.
-            timeMillisNextPrayer = prayerTimesOfNextDay[0].getTime();
-        } else {
-            timeMillisNextPrayer = prayerTimesOfThisDay[indexOfCurrentPrayerTime + 1].getTime();
+                // getting Fajr-prayer time of next day.
+                timeMillisNextPrayer = prayerTimesOfNextDay[0].getTime();
+            } else {
+                timeMillisNextPrayer = prayerTimesOfThisDay[indexOfCurrentPrayerTime + 1].getTime();
+            }
         }
-
-        Console.log("--------");
-        Console.log(new Date(timeMillisNextPrayer).toString());
-        Console.log(new Date(dateTimeNowMillis).toString());
 
         DateTime difference = new DateTime(timeMillisNextPrayer - dateTimeNowMillis);
 
